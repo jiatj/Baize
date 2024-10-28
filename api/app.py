@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv 
 
 from configs import dify_config
 
@@ -31,13 +32,29 @@ from models import account, dataset, model, source, task, tool, tools, web  # no
 
 
 warnings.simplefilter("ignore", ResourceWarning)
+# Load environment variables
+load_dotenv()
 
-os.environ["TZ"] = "UTC"
-# windows platform not support tzset
-if hasattr(time, "tzset"):
+
+# Get timezone from environment variables, default to UTC if not set
+TIMEZONE = os.getenv('TIMEZONE', 'UTC')
+
+# Set timezone based on platform
+if os.name == "nt":
+    # Windows: convert timezone format (e.g., Asia/Shanghai -> China Standard Time)
+    timezone_mapping = {
+        'Asia/Shanghai': 'China Standard Time',
+        'UTC': 'UTC',
+        # 可以根据需要添加更多映射
+    }
+    windows_timezone = timezone_mapping.get(TIMEZONE, 'UTC')
+    print(windows_timezone)
+    os.system(f'tzutil /s "{windows_timezone}"')
+else:
+    # Linux/Unix
+    os.environ['TZ'] = TIMEZONE
     time.tzset()
-
-
+    
 # create app
 app = create_app()
 celery = app.extensions["celery"]

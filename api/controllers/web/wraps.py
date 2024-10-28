@@ -10,6 +10,7 @@ from libs.passport import PassportService
 from models.model import App, EndUser, Site
 from services.enterprise.enterprise_service import EnterpriseService
 from services.feature_service import FeatureService
+from extensions.ext_redis import redis_client
 
 
 def validate_jwt_token(view=None):
@@ -44,13 +45,26 @@ def decode_jwt_token():
         if auth_scheme != "bearer":
             raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
         decoded = PassportService().verify(tk)
-        app_code = decoded.get("app_code")
-        app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
-        site = db.session.query(Site).filter(Site.code == app_code).first()
+        uuid =  decoded.get('uuid')
+
+        app_id = redis_client.get('app.'+uuid);
+     
+        if not app_id:
+            print(' redis app_id is NoneType ')
+            raise Unauthorized('app id not found')
+        
+        app_id = app_id.decode()
+
+        print('uuid='+uuid+' app_id='+app_id)
+        # app_code = decoded.get('app_code')
+
+        app_model = db.session.query(App).filter(App.id ==app_id).first()
+        #app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
+        #site = db.session.query(Site).filter(Site.code == app_code).first()
         if not app_model:
             raise NotFound()
-        if not app_code or not site:
-            raise BadRequest("Site URL is no longer valid.")
+        # if not app_code or not site:
+        #     raise BadRequest("Site URL is no longer valid.")
         if app_model.enable_site is False:
             raise BadRequest("Site is disabled.")
         end_user = db.session.query(EndUser).filter(EndUser.id == decoded["end_user_id"]).first()
