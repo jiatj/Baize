@@ -289,6 +289,8 @@ services:
       NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED:-0}
       TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
       CSP_WHITELIST: ${CSP_WHITELIST:-}
+    ports:
+    - "3000:3000"  # 将主机的 3000 端口映射到容器的 3000 端口
   app:
     image: langgenius/chat-ui:latest
     restart: always
@@ -297,6 +299,8 @@ services:
       SENTRY_DSN: ${WEB_SENTRY_DSN:-}
       TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
       CSP_WHITELIST: ${CSP_WHITELIST:-}
+    ports:
+    - "3001:3001"  # 将主机的 3001 端口映射到容器的 3001 端口
 
 
   # The postgres database.

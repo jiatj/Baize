@@ -32,8 +32,8 @@ push-api:
 	docker push $(API_IMAGE):$(VERSION)
 	@echo "API Docker image pushed successfully: $(API_IMAGE):$(VERSION)"
 
-# Build all images
-build-all: build-web build-api build-app
+# Build all images build-web 
+build-all: build-api build-app
 
 # Push all images
 push-all: push-web push-api
