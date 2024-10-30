@@ -289,6 +289,11 @@ services:
       NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED:-0}
       TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
       CSP_WHITELIST: ${CSP_WHITELIST:-}
+    ports:
+    - "3000:3000"  # 将主机的 3000 端口映射到容器的 3000 端口
+    networks:
+    - ssrf_proxy_network
+    - default
   app:
     image: langgenius/chat-ui:latest
     restart: always
@@ -297,6 +302,11 @@ services:
       SENTRY_DSN: ${WEB_SENTRY_DSN:-}
       TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
       CSP_WHITELIST: ${CSP_WHITELIST:-}
+    ports:
+    - "3001:3001"  # 将主机的 3001 端口映射到容器的 3001 端口
+    networks:
+    - ssrf_proxy_network
+    - default
 
 
   # The postgres database.
@@ -447,8 +457,6 @@ services:
     ports:
       - '${EXPOSE_NGINX_PORT:-80}:${NGINX_PORT:-80}'
       - '${EXPOSE_NGINX_SSL_PORT:-443}:${NGINX_SSL_PORT:-443}'
-      - "3000:3000"  # 将主机的 3000 端口映射到容器的 3000 端口 web服务
-      - "3001:3001"  # 将主机的 3001 端口映射到容器的 3001 端口 chat-ui 也就是app服务
 
   # The Weaviate vector store.
   weaviate:
