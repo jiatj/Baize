@@ -46,8 +46,10 @@ def decode_jwt_token():
             raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
         decoded = PassportService().verify(tk)
         uuid =  decoded.get('uuid')
-
-        app_id = redis_client.get('app.'+uuid);
+        if not uuid:
+            print('Token is not issued by Baize ')
+            raise Unauthorized('Token not valiated, not issued by Baize')
+        app_id = redis_client.get('app:'+uuid);
      
         if not app_id:
             print(' redis app_id is NoneType ')
