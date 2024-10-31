@@ -39,7 +39,7 @@ const SwrInitor = ({
       // router.push('/')
       // return
       // let url = API_URL + `/sys/thirdLogin/render/${source}`
-      const redirect_url = 'http://192.168.10.70:3001/'
+      const redirect_url = 'http://192.168.10.70/bot'
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
       const url = `http://yuntengwangluo.3322.org:8082/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
       const u = navigator.userAgent

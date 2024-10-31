@@ -16,6 +16,16 @@ const nextConfig = {
     // https://nextjs.org/docs/api-reference/next.config.js/ignoring-typescript-errors
     ignoreBuildErrors: true,
   },
+  basePath: '/bot',
+  async redirects() {
+    return [
+      {
+        source: '/bot',
+        destination: '/',
+        permanent: false,
+      },
+    ]
+  }
 }
 
 module.exports = nextConfig

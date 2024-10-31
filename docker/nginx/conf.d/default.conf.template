@@ -29,8 +29,8 @@ server {
       include proxy.conf;
     }
      
-    location /chat {
-      proxy_pass http://app:3001/chat;
+    location /bot {
+      proxy_pass http://app:3001/bot;
       include proxy.conf;
     }
 

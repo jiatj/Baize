@@ -263,7 +263,7 @@ const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent, bod
   // options.headers.set('X-App-Id', appid)
   const urlPrefix = API_PREFIX
 
-  let urlWithPrefix = `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`
+  let urlWithPrefix = `/api${url.startsWith('/') ? url : `/${url}`}`
   const { method, params, body } = options
   // handle query
   if (method === 'GET' && params) {
