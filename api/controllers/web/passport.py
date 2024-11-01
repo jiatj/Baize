@@ -11,7 +11,7 @@ from libs.passport import PassportService
 from models.model import App, EndUser, Site
 from services.enterprise.enterprise_service import EnterpriseService
 from services.feature_service import FeatureService
-
+from extensions.ext_redis import redis_client
 
 class PassportResource(Resource):
     """Base resource for passport."""
@@ -46,16 +46,21 @@ class PassportResource(Resource):
 
         db.session.add(end_user)
         db.session.commit()
-
+        str_uuid = end_user.id
         payload = {
-            "iss": site.app_id,
+            # "iss": site.app_id,
+            "iss":  'itgo',
             "sub": "Web API Passport",
-            "app_id": site.app_id,
+            # "app_id": site.app_id,
             "app_code": app_code,
+            'uuid':  str_uuid,
             "end_user_id": end_user.id,
         }
 
         tk = PassportService().issue(payload)
+
+        # jiatj 把appid写入redis
+        redis_client.set('app:'+str_uuid, site.app_id)
 
         return {
             "access_token": tk,

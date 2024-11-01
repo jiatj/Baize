@@ -261,6 +261,7 @@ const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent, bod
   options.headers.set('Authorization', `Bearer ${accessToken}`)
   const appid = globalThis.localStorage.getItem('appid') || '0'
   // options.headers.set('X-App-Id', appid)
+  options.headers.set('X-App-Code', globalThis.localStorage.getItem('app_code'))
   const urlPrefix = API_PREFIX
 
   let urlWithPrefix = `/api${url.startsWith('/') ? url : `/${url}`}`
@@ -350,7 +351,7 @@ const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent, bod
 
 export const upload = (fetchOptions: any): Promise<any> => {
   const urlPrefix = API_PREFIX
-  const urlWithPrefix = `${urlPrefix}/files/upload`
+  const urlWithPrefix = `/api/files/upload`
   const accessToken = localStorage.getItem('access_token')
 
   const defaultOptions = {
@@ -408,7 +409,7 @@ export const ssePost = (
   }, fetchOptions)
 
   const urlPrefix = API_PREFIX
-  const urlWithPrefix = `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`
+  const urlWithPrefix = `/api${url.startsWith('/') ? url : `/${url}`}`
 
   const { body } = options
   if (body)

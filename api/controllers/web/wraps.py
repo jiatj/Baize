@@ -64,6 +64,7 @@ def decode_jwt_token():
         #app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
         #site = db.session.query(Site).filter(Site.code == app_code).first()
         if not app_model:
+            print(f'appid={app_id} not found ')
             raise NotFound()
         # if not app_code or not site:
         #     raise BadRequest("Site URL is no longer valid.")
@@ -73,7 +74,7 @@ def decode_jwt_token():
         if not end_user:
             raise NotFound()
 
-        _validate_web_sso_token(decoded, system_features, app_code)
+        # _validate_web_sso_token(decoded, system_features, app_code)
 
         return app_model, end_user
     except Unauthorized as e:

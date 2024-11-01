@@ -19,8 +19,9 @@ const SwrInitor = ({
   const [init, setInit] = useState(false)
 
   const handleLogin = async (code: string) => {
-    const { access_token, apps }: any = await login(code)
+    const { access_token, apps, app_code }: any = await login(code)
     globalThis.localStorage?.setItem('access_token', access_token)
+    globalThis.localStorage?.setItem('app_code', app_code)
     globalThis.localStorage?.setItem('apps', JSON.stringify(apps))
     let appid: string = globalThis.localStorage?.getItem('APP_ID') || ''
     if ((appid === null || appid === '' || appid === undefined) && apps.length > 0)

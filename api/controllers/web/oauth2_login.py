@@ -27,9 +27,9 @@ class Auth2LoginResource(Resource):
         
         if code is None:
             raise Unauthorized('PathVariable code  missed.')
-        system_features = FeatureService.get_system_features()
-        if system_features.sso_enforced_for_web:
-            raise WebSSOAuthRequiredError()
+        # system_features = FeatureService.get_system_features()
+        # if system_features.sso_enforced_for_web:
+        #     raise WebSSOAuthRequiredError()
      
 
         app_id = None
@@ -54,6 +54,7 @@ class Auth2LoginResource(Resource):
         infos = userInfo.get("infos")
         apps = infos.get("apps")   
         default_app = self.get_default_app(apps)
+        print(f'defalt app 肯定有啊={default_app}')
 
         # 用户不存在，则从sso得到用户然后创建用户
         if not end_user:
@@ -78,47 +79,54 @@ class Auth2LoginResource(Resource):
         str_uuid = end_user.id
    
             
-        print('uuid='+str_uuid)
+        print('uuid 也是userid='+str_uuid)
+       
+       
+       
+        
+        # 否则，取上次访问的app
+        last_app_id = redis_client.get('app:'+str_uuid)
+        print(f'last_app_id={last_app_id}')    
+        if last_app_id:
+            # redis中app_id已经失效
+            if self.validate_app_id(apps, last_app_id)==False:
+               print(f'last_app_id not valid')
+               app_id = default_app
+               redis_client.set('app:'+str_uuid, app_id)
+            else:
+               app_id = last_app_id
+               self.set_default_app(apps, app_id)
+        else:
+                # 否则，使用默认
+            app_id = default_app
+            redis_client.set('app:'+str_uuid, app_id)
+            
+        print(f'最终app_id={app_id}')        
+        
+        # 根据app_id得到site，然后得到site的code，即是app_code
+        site = db.session.query(Site).filter(Site.app_id == app_id, Site.status == "normal").first()
+        
+        if not site:
+            print(f'appid={app_id} not found site 奇怪')
+            site = db.session.query(Site).filter(Site.status == "normal").first()
+            print(f'new appid={site.app_id} code={site.code}')
+            # raise NotFound()
+        
+        app_code= site.code
         payload = {
             "iss": 'itgo',
             'sub': 'Web API Passport',
             # 'app_id': '0',
-            # 'app_code': app_code,
+            'app_code': app_code,
             'uuid': str_uuid,
             'end_user_id': end_user.id,
         }
         
         tk = PassportService().issue(payload)
-       
-        if app_id :
-            if self.validate_app_id(app_id,apps)==False:
-                app_id= None
-        
-        # 切换app 
-        # 用户显示的登录app，则切换到该app
-        if app_id:
-            #redis_client.setex('app.'+str_uuid, 24*60*60, app_id)
-            redis_client.set('app:'+str_uuid, app_id)
-            self.set_default_app(apps, app_id)
-        else:
-            # 否则，取上次访问的app
-            last_app = redis_client.get('app:'+str_uuid)
-            
-            if last_app:
-               if self.validate_app_id(apps, last_app)==False:
-                   last_app=  default_app
-               else:
-                   app_id = last_app
-                   self.set_default_app(apps, app_id)
-            else:
-                # 否则，使用默认
-                app_id = default_app
-                redis_client.set('app:'+str_uuid, app_id)
-                
-        print(f'appid={app_id}')
         return {
             'access_token': tk,
             'apps':apps,
+            'app_code': app_code
         }
 
     def get_default_app(self,apps):
