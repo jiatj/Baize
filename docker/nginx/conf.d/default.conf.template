@@ -28,6 +28,11 @@ server {
       proxy_pass http://web:3000;
       include proxy.conf;
     }
+     
+    location /bot {
+      proxy_pass http://app:3001/bot;
+      include proxy.conf;
+    }
 
     # placeholder for acme challenge location
     ${ACME_CHALLENGE_LOCATION}

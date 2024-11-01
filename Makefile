@@ -1,7 +1,8 @@
 # Variables
 DOCKER_REGISTRY=langgenius
 WEB_IMAGE=$(DOCKER_REGISTRY)/dify-web
-API_IMAGE=$(DOCKER_REGISTRY)/dify-api
+API_IMAGE=$(DOCKER_REGISTRY)/dify-api-baize
+APP_IMAGE=$(DOCKER_REGISTRY)/chat-ui
 VERSION=latest
 
 # Build Docker images
@@ -15,6 +16,11 @@ build-api:
 	docker build -t $(API_IMAGE):$(VERSION) ./api
 	@echo "API Docker image built successfully: $(API_IMAGE):$(VERSION)"
 
+build-app:
+	@echo "Building API Docker image: $(APP_IMAGE):$(VERSION)..."
+	docker build -t $(APP_IMAGE):$(VERSION) ./chat-ui
+	@echo "API Docker image built successfully: $(APP_IMAGE):$(VERSION)"
+
 # Push Docker images
 push-web:
 	@echo "Pushing web Docker image: $(WEB_IMAGE):$(VERSION)..."
@@ -26,8 +32,8 @@ push-api:
 	docker push $(API_IMAGE):$(VERSION)
 	@echo "API Docker image pushed successfully: $(API_IMAGE):$(VERSION)"
 
-# Build all images
-build-all: build-web build-api
+# Build all images build-web 
+build-all: build-api build-app
 
 # Push all images
 push-all: push-web push-api
@@ -40,4 +46,4 @@ build-push-all: build-all push-all
 	@echo "All Docker images have been built and pushed."
 
 # Phony targets
-.PHONY: build-web build-api push-web push-api build-all push-all build-push-all
+.PHONY: build-web build-api build-app push-web push-api build-all push-all build-push-all

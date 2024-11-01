@@ -241,7 +241,7 @@ x-shared-env: &shared-api-worker-env
 services:
   # API service
   api:
-    image: langgenius/dify-api:0.10.1
+    image: langgenius/dify-api-baize:latest
     restart: always
     environment:
       # Use the shared environment variables.
@@ -261,7 +261,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: langgenius/dify-api:0.10.1
+    image: langgenius/dify-api-baize:latest
     restart: always
     environment:
       # Use the shared environment variables.
@@ -289,7 +289,16 @@ services:
       NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED:-0}
       TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
       CSP_WHITELIST: ${CSP_WHITELIST:-}
-
+  
+  app:
+    image: langgenius/chat-ui:latest
+    restart: always
+    environment:
+      APP_API_URL: ${APP_API_URL:-}
+      SENTRY_DSN: ${WEB_SENTRY_DSN:-}
+      TEXT_GENERATION_TIMEOUT_MS: ${TEXT_GENERATION_TIMEOUT_MS:-60000}
+      CSP_WHITELIST: ${CSP_WHITELIST:-}
+    
   # The postgres database.
   db:
     image: postgres:15-alpine
@@ -434,10 +443,10 @@ services:
     depends_on:
       - api
       - web
+      - app
     ports:
       - '${EXPOSE_NGINX_PORT:-80}:${NGINX_PORT:-80}'
       - '${EXPOSE_NGINX_SSL_PORT:-443}:${NGINX_SSL_PORT:-443}'
-
   # The Weaviate vector store.
   weaviate:
     image: semitechnologies/weaviate:1.19.0

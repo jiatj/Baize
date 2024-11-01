@@ -3,7 +3,7 @@ FROM node:20.11-alpine3.19 AS base
 LABEL maintainer="takatost@gmail.com"
 
 # if you located in China, you can use aliyun mirror to speed up
-# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 RUN apk add --no-cache tzdata
 
@@ -19,7 +19,9 @@ COPY yarn.lock .
 # if you located in China, you can use taobao registry to speed up
 # RUN yarn install --frozen-lockfile --registry https://registry.npmmirror.com/
 
-RUN yarn install --frozen-lockfile
+#RUN yarn install --frozen-lockfile
+RUN yarn config set registry https://registry.npmmirror.com/
+RUN yarn install
 
 # build resources
 FROM base AS builder
