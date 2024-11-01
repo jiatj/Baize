@@ -1,7 +1,8 @@
 # Jiatj Memo
 
 ## 修改app的认证流程
-1. 原来调用 api/passport ，文件位置 api/controllers/web/passport.py,  这个接口放弃，不调用，他会自动生成一个用户登录，相当于匿名登录。
+1. 原来调用 api/passport ，文件位置 api/controllers/web/passport.py,  他会自动生成一个用户登录，相当于匿名登录。
+
 2. 前端发现没有token或者401，则走单点登录
     2.1 单点登录配置
         2.1.1 sso配置sys_app
@@ -35,6 +36,10 @@ cd api pip
 run.bat
 
 ## 修改文件列表
+### api/controllers/web/passport.py
+修改passport，兼容我们的版本
+
+
 ###  api/services/file_service.py  新版中不同了。
 1. 增加mp4
     ALLOWED_EXTENSIONS = ['txt', 'markdown', 'md', 'pdf', 'html', 'htm', 'xlsx', 'xls', 'docx', 'csv','mp4']
