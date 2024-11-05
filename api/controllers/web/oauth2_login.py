@@ -53,8 +53,10 @@ class Auth2LoginResource(Resource):
          # 得到apps
         infos = userInfo.get("infos")
         apps = infos.get("apps")   
+        nick_name = userInfo.get("nickname")
         default_app = self.get_default_app(apps)
         print(f'defalt app 肯定有啊={default_app}')
+        mobile = userInfo.get('mobile')
 
         # 用户不存在，则从sso得到用户然后创建用户
         if not end_user:
@@ -66,6 +68,7 @@ class Auth2LoginResource(Resource):
                 tenant_id = tenant_id,
                 app_id= default_app,
                 external_user_id=openid,
+                name = mobile,
                 type='browser',
                 is_anonymous=False,
                 session_id=generate_session_id(),
@@ -126,7 +129,9 @@ class Auth2LoginResource(Resource):
         return {
             'access_token': tk,
             'apps':apps,
-            'app_code': app_code
+            'app_code': app_code,
+            'mobile':mobile,
+            'nick_name': nick_name
         }
 
     def get_default_app(self,apps):

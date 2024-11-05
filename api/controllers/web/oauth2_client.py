@@ -50,10 +50,23 @@ class OAuth2Client():
         
         return OAuth2Client._send_request(OAuth2Config.USER_URL, data)
         
+    @staticmethod
+    def exchange_access_token(token):
+        if not token:
+            raise ValueError("token cannot be empty.")
         
+        # 构建请求数据
+        data = {
+            'token': token
+        }
+        
+        return OAuth2Client._send_request(OAuth2Config.EXCHANGE_URL, data)
+
+    # 得到用户信息    
 
 class OAuth2Config:
     TOKEN_URL = 'http://192.168.10.68:8080/sso/oauth2/token'
+    EXCHANGE_URL = 'http://192.168.10.68:8080/sso/exchange/token'
     USER_URL= 'http://192.168.10.68:8080/sso/user/info'
     APP_ID = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
     APP_SECRET= 'abcde333333dafasdf@@@'

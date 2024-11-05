@@ -1,5 +1,16 @@
 # Jiatj Memo
 
+## 白泽的使用场景
+1. 匿名使用
+2. 集成现有系统的用户
+    2.1 显示登录
+    2.2 静默登录
+    2.3 客户端模式
+        使用目前的token换登录。我根据token（这个token一定按sso的标准）向sso验证登录。
+        如果没有用户，则是匿名登录
+        
+
+   
 ## 修改app的认证流程
 1. 原来调用 api/passport ，文件位置 api/controllers/web/passport.py,  他会自动生成一个用户登录，相当于匿名登录。
 
