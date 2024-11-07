@@ -77,6 +77,10 @@ export const login = async (code: string) => {
   return get(`auth2/login/${code}`)
 }
 
+export const iframeLogin = async (code: string) => {
+  return get(`iu_token/${code}`)
+}
+
 export const switchApp = async (appid: string) => {
   return get(`app/switch/${appid}`)
 }
