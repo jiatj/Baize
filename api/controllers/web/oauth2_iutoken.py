@@ -15,18 +15,17 @@ from models.account import Tenant
 from extensions.ext_redis import redis_client
 
 
-# jiatj 20240812增加
-# todo 如果appid失效了，还得从apps取默认的
+# jiatj 20241104增加  inner universal token登录
 
-class Auth2LoginResource(Resource):
+class IUTokenResource(Resource):
      
 
     """Base resource for Auth2LoginResource."""
-    def get(self, code):
-        print(f'login code={code}' )
+    def get(self, token):
+        print(f'iu token ={token}' )
         
-        if code is None:
-            raise Unauthorized('PathVariable code  missed.')
+        if token is None:
+            raise Unauthorized('PathVariable token  missed.')
         # system_features = FeatureService.get_system_features()
         # if system_features.sso_enforced_for_web:
         #     raise WebSSOAuthRequiredError()
@@ -37,26 +36,21 @@ class Auth2LoginResource(Resource):
         #     raise Unauthorized('X-App-Id header is missing.')
         
         # 根据code获取access_token
-        accessToken = OAuth2Client.get_access_token(code)
-        if not  accessToken:
-            raise Unauthorized('code 已过期')
+        ssoUser = OAuth2Client.exchange_access_token(token)
+        if not  ssoUser:
+            raise Unauthorized('token 失效')
         # 得到openid 和 token
-        openid= accessToken.get("openid")
+        openid= ssoUser.get("openid")
+        mobile = ssoUser.get('mobile')
         # 根据openid得到用户
         end_user = db.session.query(EndUser).filter(EndUser.external_user_id == openid).first()
-        token = accessToken.get("access_token")
-        # 每次都查询吗？比较安全
-        userInfo = OAuth2Client.get_user_info(token, openid)
-       
-        if not userInfo:
-            raise Unauthorized('Failed to get user info from SSO.')   
+  
          # 得到apps
-        infos = userInfo.get("infos")
+        infos = ssoUser.get("infos")
         apps = infos.get("apps")   
-        nick_name = userInfo.get("nickname")
+        nick_name = ssoUser.get("nickname")
         default_app = self.get_default_app(apps)
         print(f'defalt app 肯定有啊={default_app}')
-        mobile = userInfo.get('mobile')
 
         # 用户不存在，则从sso得到用户然后创建用户
         if not end_user:
@@ -154,7 +148,7 @@ class Auth2LoginResource(Resource):
                 return True
         return False
     
-api.add_resource(Auth2LoginResource, '/auth2/login/<code>')
+api.add_resource(IUTokenResource, '/iu_token/<token>')
 
 
 def generate_session_id():
