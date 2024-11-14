@@ -47,7 +47,7 @@ Dify is an open-source LLM app development platform. Its intuitive interface com
 
 ## build
 
-#项目跟目录下
+#项目根目录下
  打包app镜像
   make build-app
  打包后端镜像
