@@ -8,8 +8,8 @@ from core.extension.api_based_extension_requestor import APIBasedExtensionReques
 
 
 # 外部API扩展
-class ExtensionResource(WebApiResource):
-    def get(self, app_model, end_user, api_name, variable):
+class ExtensionDataApi(WebApiResource):
+    def post(self, app_model, end_user, api_name, variable):
         parser = reqparse.RequestParser()
         parser.add_argument("inputs", type=dict, required=True, location="json")
         parser.add_argument("query", type=str, required=False, location="json", default="")
@@ -65,4 +65,4 @@ class ExtensionResource(WebApiResource):
 
         return response_json["result"]
 
-api.add_resource(ExtensionResource, '/ext_api/<string:api_name>/<string:variable>') 
+api.add_resource(ExtensionDataApi, '/ext-api/<string:api_name>/<string:variable>') 
