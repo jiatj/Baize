@@ -261,9 +261,10 @@ const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent, bod
   options.headers.set('Authorization', `Bearer ${accessToken}`)
   const appid = globalThis.localStorage.getItem('appid') || '0'
   // options.headers.set('X-App-Id', appid)
+  options.headers.set('X-App-Code', globalThis.localStorage.getItem('app_code'))
   const urlPrefix = API_PREFIX
 
-  let urlWithPrefix = `/api${url.startsWith('/') ? url : `/${url}`}`
+  let urlWithPrefix = `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`
   const { method, params, body } = options
   // handle query
   if (method === 'GET' && params) {

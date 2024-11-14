@@ -12,8 +12,8 @@ export const APP_INFO: AppInfo = {
 
 export const isShowPrompt = false
 export const promptTemplate = 'I want you to act as a javascript console.'
-
-export const API_PREFIX = `${process.env.APP_API_URL}/api`
+export const isDev = true
+export const API_PREFIX = isDev ? 'http://192.168.10.70/api' : '/api'
 
 export const LOCALE_COOKIE_NAME = 'locale'
 

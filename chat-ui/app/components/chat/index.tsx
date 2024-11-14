@@ -371,7 +371,7 @@ const Chat: FC<IChatProps> = ({
               /> */}
               <PromptEditor
                 className={`
-                 block w-full px-2 pr-[138px] py-[7px] leading-5 ${currentTag.name ? 'h-[76px]' : 'h-[100px]'} overflow-y-scroll text-sm text-gray-700 outline-none appearance-none resize-none}
+                 block w-full px-2 py-[7px] leading-5 ${currentTag.name ? 'h-[76px]' : 'h-[100px]'} overflow-y-auto no-scrollbar text-sm text-gray-700 outline-none appearance-none resize-none}
                 `}
                 placeholderClassName={'leading-4'}
                 compact

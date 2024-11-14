@@ -4,7 +4,8 @@ import { SWRConfig } from 'swr'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { login, switchApp } from '@/service'
+import { iframeLogin, login, switchApp } from '@/service'
+import { isDev } from '@/config'
 
 type SwrInitorProps = {
   children: ReactNode
@@ -15,12 +16,14 @@ const SwrInitor = ({
   const router = useRouter()
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
+  const token = searchParams.get('token')
   const accessTokenFromLocalStorage = localStorage?.getItem('access_token')
   const [init, setInit] = useState(false)
 
   const handleLogin = async (code: string) => {
-    const { access_token, apps }: any = await login(code)
+    const { access_token, apps, app_code }: any = await login(code)
     globalThis.localStorage?.setItem('access_token', access_token)
+    globalThis.localStorage?.setItem('app_code', app_code)
     globalThis.localStorage?.setItem('apps', JSON.stringify(apps))
     let appid: string = globalThis.localStorage?.getItem('APP_ID') || ''
     if ((appid === null || appid === '' || appid === undefined) && apps.length > 0)
@@ -31,7 +34,33 @@ const SwrInitor = ({
     router.replace('/', { forceOptimisticNavigation: false } as any)
   }
 
+  const handleLoginByIframe = async (token: string) => {
+    const { access_token, apps, app_code }: any = await iframeLogin(token)
+    globalThis.localStorage?.setItem('access_token', access_token)
+    globalThis.localStorage?.setItem('app_code', app_code)
+    globalThis.localStorage?.setItem('apps', JSON.stringify(apps))
+    let appid: string = globalThis.localStorage?.getItem('APP_ID') || ''
+    if ((appid === null || appid === '' || appid === undefined) && apps.length > 0)
+      appid = (apps.find((app: any) => app.actived === 'y'))?.appId
+
+    globalThis.localStorage?.setItem('APP_ID', appid)
+    const { data }: any = await switchApp(appid)
+    router.replace('/', { forceOptimisticNavigation: true } as any)
+    globalThis.location.reload()
+  }
+
   useEffect(() => {
+    if (token && !accessTokenFromLocalStorage) {
+      handleLoginByIframe(token)
+      return
+    }
+    window.addEventListener('message', (event) => {
+      const { data }: any = event
+      if (!accessTokenFromLocalStorage)
+        handleLoginByIframe(data)
+      else
+        router.replace('/', { forceOptimisticNavigation: false } as any)
+    })
     if (!(code || accessTokenFromLocalStorage)) {
       // router.replace('/signin')
       // const access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkNGY5MjA1Zi1hNDc1LTQzMjUtODlmMy04NmYzYjdmOWUzNzEiLCJzdWIiOiJXZWIgQVBJIFBhc3Nwb3J0IiwiYXBwX2lkIjoiZDRmOTIwNWYtYTQ3NS00MzI1LTg5ZjMtODZmM2I3ZjllMzcxIiwiYXBwX2NvZGUiOiJITzJFamZoRVFOVm5TYnlEIiwiZW5kX3VzZXJfaWQiOiI1OTI2M2Y2Yi03ODA0LTRjZDgtYmUxMS01NjQzM2FjN2YyYzEifQ.oWtH5709cSu7dvVI9MUMMj4bIXKpPU1rhD-5jqwItIw"
@@ -39,7 +68,8 @@ const SwrInitor = ({
       // router.push('/')
       // return
       // let url = API_URL + `/sys/thirdLogin/render/${source}`
-      const redirect_url = 'http://192.168.10.70/bot'
+      console.log(isDev)
+      const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : 'http://192.168.10.70/bot'
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
       const url = `http://yuntengwangluo.3322.org:8082/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
       const u = navigator.userAgent
