@@ -102,7 +102,9 @@ api/controllers/web下增加
 1. oauth2_app.py，处理切换app的逻辑
 2. oauth2_login.py，处理和sso的交互逻辑
 3. OAuth2_client.py，封装sso的接口
- 
+4. oauth2_iutoken.py 内部inner universal token 使用其他系统的token换成dify的token
+5. extention.py  执行扩展api
+
 
 
 ## 过程中的问题
