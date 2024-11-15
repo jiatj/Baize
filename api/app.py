@@ -121,14 +121,16 @@ def pool_stat():
     }
 
 
-@app.before_first_request
 def print_routes():
-    print("\n=== 所有注册的路由 ===")
-    for rule in current_app.url_map.iter_rules():
-        print(f"路由: {rule.rule}")
-        print(f"方法: {', '.join(rule.methods)}")
-        print(f"终端点: {rule.endpoint}\n")
+    with app.app_context():
+        print("\n=== 所有注册的路由 ===")
+        for rule in current_app.url_map.iter_rules():
+            print(f"路由: {rule.rule}")
+            print(f"方法: {', '.join(rule.methods)}")
+            print(f"终端点: {rule.endpoint}\n")
 
+# 在应用启动时直接调用
+# print_routes()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

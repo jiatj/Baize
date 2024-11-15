@@ -17,7 +17,7 @@ class ExtensionDataApi(WebApiResource):
         parser.add_argument("files", type=list, required=False, location="json")
         parser.add_argument("conversation_id", type=str, default="", location="json")
 
-
+        print('extension api name {api_name} variable {variable} tenant_id= {app_model.tenant_id}' )
         args = parser.parse_args()
         app_id = app_model.id
         query = args["query"]
@@ -26,7 +26,7 @@ class ExtensionDataApi(WebApiResource):
         # get api_based_extension
         api_based_extension = (
             db.session.query(APIBasedExtension)
-            .filter(APIBasedExtension.tenant_id == self.tenant_id, APIBasedExtension.name == api_name)
+            .filter(APIBasedExtension.tenant_id == app_model.tenant_id, APIBasedExtension.name == api_name)
             .first()
         )
 
@@ -36,7 +36,7 @@ class ExtensionDataApi(WebApiResource):
             )
 
         # decrypt api_key
-        api_key = encrypter.decrypt_token(tenant_id=self.tenant_id, token=api_based_extension.api_key)
+        api_key = encrypter.decrypt_token(tenant_id=app_model.tenant_id, token=api_based_extension.api_key)
 
         try:
             requestor = APIBasedExtensionRequestor(api_endpoint=api_based_extension.api_endpoint, api_key=api_key)
@@ -58,16 +58,9 @@ class ExtensionDataApi(WebApiResource):
             raise ValueError(
                 f"[External data tool] API query failed, api_name: {api_name}, variable: {variable}, error: result not found in response"
             )
-
-        if not isinstance(response_json["result"], str):
-            raise ValueError(
-                f"[External data tool] API query failed, api_name: {api_name},  variable: {variable}, error: result is not string"
-            )
-
-        response = {
-            "result": response_json["result"],
-            "success": True
-        }
-        return helper.compact_generate_response(response)
+        
+        return response_json
+     
+ 
 
 api.add_resource(ExtensionDataApi, '/ext-api/<string:api_name>/<string:variable>') 
