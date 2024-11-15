@@ -17,7 +17,7 @@ import threading
 import time
 import warnings
 
-from flask import Response
+from flask import Response, current_app
 
 from app_factory import create_app
 
@@ -119,6 +119,15 @@ def pool_stat():
         "connection_timeout": engine.pool.timeout(),
         "recycle_time": db.engine.pool._recycle,
     }
+
+
+@app.before_first_request
+def print_routes():
+    print("\n=== 所有注册的路由 ===")
+    for rule in current_app.url_map.iter_rules():
+        print(f"路由: {rule.rule}")
+        print(f"方法: {', '.join(rule.methods)}")
+        print(f"终端点: {rule.endpoint}\n")
 
 
 if __name__ == "__main__":
