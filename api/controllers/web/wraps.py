@@ -85,7 +85,7 @@ def decode_jwt_token():
 
         raise Unauthorized(e.description)
 
-
+# 这个引用已经废弃
 def _validate_web_sso_token(decoded, system_features, app_code):
     app_web_sso_enabled = False
 
