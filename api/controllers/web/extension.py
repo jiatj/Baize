@@ -5,6 +5,7 @@ from core.helper import encrypter
 from extensions.ext_database import db
 from models.api_based_extension import APIBasedExtension, APIBasedExtensionPoint
 from core.extension.api_based_extension_requestor import APIBasedExtensionRequestor
+from libs import helper
 
 
 # 外部API扩展
@@ -63,6 +64,10 @@ class ExtensionDataApi(WebApiResource):
                 f"[External data tool] API query failed, api_name: {api_name},  variable: {variable}, error: result is not string"
             )
 
-        return response_json["result"]
+        response = {
+            "result": response_json["result"],
+            "success": True
+        }
+        return helper.compact_generate_response(response)
 
 api.add_resource(ExtensionDataApi, '/ext-api/<string:api_name>/<string:variable>') 
