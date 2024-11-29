@@ -59,7 +59,9 @@ def decode_jwt_token():
         # app_id = app_id.decode()
 
         # print('uuid='+uuid+' app_id='+app_id)
-        # app_code = decoded.get('app_code')
+        # 我们的前端传app_code，原来的前端只有passport传
+        if not app_code:
+            app_code = decoded.get('app_code')
         site = db.session.query(Site).filter(Site.code == app_code).first()
         
         app_model = db.session.query(App).filter(App.id ==site.app_id).first()
