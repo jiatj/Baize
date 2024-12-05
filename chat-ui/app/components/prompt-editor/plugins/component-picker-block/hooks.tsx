@@ -25,7 +25,6 @@ export const useMenuOptions = (
       })
     }
     const baseOptions = (menu).map((item: MenuOption) => {
-
       return new PickerBlockMenuOption({
         key: item.id,
         name: item.name,
@@ -42,7 +41,7 @@ export const useMenuOptions = (
                   background={item.icon_background}
                 />
               }
-              extraElement={<div className='text-xs text-gray-400'>ccc</div>}
+              extraElement={<div className='text-xs text-gray-400'>{item.typeName}</div>}
               queryString={queryString}
               isSelected={isSelected}
               onClick={onSelect}

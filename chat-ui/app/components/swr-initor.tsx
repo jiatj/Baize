@@ -17,6 +17,7 @@ const SwrInitor = ({
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
   const token = searchParams.get('token')
+  console.log('token', token)
   const accessTokenFromLocalStorage = localStorage?.getItem('access_token')
   const [init, setInit] = useState(false)
 
@@ -54,13 +55,14 @@ const SwrInitor = ({
       handleLoginByIframe(token)
       return
     }
-    window.addEventListener('message', (event) => {
-      const { data }: any = event
-      if (!accessTokenFromLocalStorage)
-        handleLoginByIframe(data)
-      else
-        router.replace('/', { forceOptimisticNavigation: false } as any)
-    })
+    // window.addEventListener('message', (event) => {
+    //   const { data }: any = event
+    //   console.log('data', data)
+    //   if (!accessTokenFromLocalStorage)
+    //     handleLoginByIframe(data)
+    //   else
+    //     router.replace('/', { forceOptimisticNavigation: false } as any)
+    // })
     if (!(code || accessTokenFromLocalStorage)) {
       // router.replace('/signin')
       // const access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkNGY5MjA1Zi1hNDc1LTQzMjUtODlmMy04NmYzYjdmOWUzNzEiLCJzdWIiOiJXZWIgQVBJIFBhc3Nwb3J0IiwiYXBwX2lkIjoiZDRmOTIwNWYtYTQ3NS00MzI1LTg5ZjMtODZmM2I3ZjllMzcxIiwiYXBwX2NvZGUiOiJITzJFamZoRVFOVm5TYnlEIiwiZW5kX3VzZXJfaWQiOiI1OTI2M2Y2Yi03ODA0LTRjZDgtYmUxMS01NjQzM2FjN2YyYzEifQ.oWtH5709cSu7dvVI9MUMMj4bIXKpPU1rhD-5jqwItIw"

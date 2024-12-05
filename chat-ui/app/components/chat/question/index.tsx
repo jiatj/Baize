@@ -29,7 +29,7 @@ const Question: FC<IQuestionProps> = ({ id, content, useCurrentUserAvatar, imgSr
             {videoImageSrcs && videoImageSrcs.length > 0 && (
               <VideoGallery videoSrcs={videoSrcs} videoImageSrcs={videoImageSrcs} />
             )}
-            <Markdown content={content} />
+            <Markdown content={content.replace(/\*{5}.*?\*{5}/g, '')} />
           </div>
         </div>
       </div>

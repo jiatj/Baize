@@ -10,8 +10,8 @@ import Toast from '@/app/components/base/toast'
 import Sidebar from '@/app/components/sidebar'
 import ConfigSence from '@/app/components/config-scence'
 import Header from '@/app/components/header'
-import { fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, stopResponseByTaskId, switchApp, updateFeedback } from '@/service'
-import type { ChatItem, ConversationItem, Feedbacktype, PromptConfig, SpeechToTextSettings, TextToSpeechSettings, VisionFile, VisionSettings } from '@/types/app'
+import { extApi, fetchAppParams, fetchChatList, fetchConversations, generationConversationName, sendChatMessage, stopResponseByTaskId, switchApp, updateFeedback } from '@/service'
+import type { ChatItem, CommandItem, ConversationItem, Feedbacktype, PromptConfig, SpeechToTextSettings, TextToSpeechSettings, VisionFile, VisionSettings } from '@/types/app'
 import { Resolution, TransferMethod, WorkflowRunningStatus } from '@/types/app'
 import Chat from '@/app/components/chat'
 import { setLocaleOnClient } from '@/i18n/client'
@@ -26,13 +26,19 @@ import { addFileInfos, sortAgentSorts } from '@/utils/tools'
 const Main: FC = () => {
   const { t } = useTranslation()
   const media = useBreakpoints()
+  // 是不是useBreakpoints 判断是不是手机
   const isMobile = media === MediaType.mobile
+  // 是否已登录
   const hasSetAppConfig = globalThis.localStorage?.getItem('access_token') !== undefined && globalThis.localStorage?.getItem('access_token') !== null
+  // 应用appId
   const [APP_ID, setAPP_ID] = useState<string>(globalThis.localStorage?.getItem('APP_ID') || '')
+  const [app_code, setApp_code] = useState<string>(globalThis.localStorage?.getItem('app_code') || '')
   /*
   * app info
   */
+  // 应用是否可用
   const [appUnavailable, setAppUnavailable] = useState<boolean>(false)
+  // 未知错误原因
   const [isUnknwonReason, setIsUnknwonReason] = useState<boolean>(false)
   const [promptConfig, setPromptConfig] = useState<PromptConfig | null>(null)
   const [inited, setInited] = useState<boolean>(false)
@@ -63,7 +69,7 @@ const Main: FC = () => {
 
   useEffect(() => {
     if (APP_INFO?.title)
-      document.title = `${APP_INFO.title} - Powered by Dify`
+      document.title = `${APP_INFO.title} - Powered by Baize`
   }, [APP_INFO?.title])
 
   // onData change thought (the produce obj). https://github.com/immerjs/immer/issues/576
@@ -143,7 +149,7 @@ const Main: FC = () => {
       fetchChatList(currConversationId).then((res: any) => {
         const { data } = res
         const newChatList: ChatItem[] = generateNewChatListWithOpenstatement(notSyncToStateIntroduction, notSyncToStateInputs)
-
+        console.log('data', data)
         data.forEach((item: any) => {
           newChatList.push({
             id: `question-${item.id}`,
@@ -161,6 +167,7 @@ const Main: FC = () => {
             message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
           })
         })
+        console.log('newChatList', newChatList)
         setChatList(newChatList)
       })
     }
@@ -179,6 +186,7 @@ const Main: FC = () => {
       setConversationIdChangeBecauseOfNew(false)
     }
     // trigger handleConversationSwitch
+    getCommondListByConversationId(id)
     setCurrConversationId(id, APP_ID)
     hideSidebar()
   }
@@ -231,6 +239,12 @@ const Main: FC = () => {
   }
 
   const [appList, setAppList] = useState(globalThis.localStorage.getItem('apps') ? JSON.parse(globalThis.localStorage.getItem('apps') as string) : [])
+  const [commandList, setCommandList] = useState([] as CommandItem[])
+  const getCommondListByConversationId = async (conversation_id: string) => {
+    const comList: { result: CommandItem[]; code: number } = await extApi('command', 'order', { conversation_id }) as { result: CommandItem[]; code: number }
+    console.log('comList', comList)
+    setCommandList(comList?.result as CommandItem[])
+  }
   // init
   useEffect(() => {
     if (!hasSetAppConfig) {
@@ -243,6 +257,7 @@ const Main: FC = () => {
         // handle current conversation id
         const { data: conversations, has_more: hasMore } = conversationData as { data: ConversationItem[]; has_more: boolean }
         const _conversationId = getConversationIdFromStorage(APP_ID)
+        getCommondListByConversationId(_conversationId)
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
         // fetch new conversation info
@@ -283,7 +298,7 @@ const Main: FC = () => {
         }
       }
     })()
-  }, [APP_ID])
+  }, [APP_ID, app_code])
 
   const [isResponsing, { setTrue: setResponsingTrue, setFalse: setResponsingFalse }] = useBoolean(false)
   const [noStopResponding, { setTrue: setNoStopRespondingTrue, setFalse: setNoStopRespondingFalse }] = useBoolean(false)
@@ -351,13 +366,14 @@ const Main: FC = () => {
     setChatList(newListWithAnswer)
   }
 
-  const handleSend = async (message: string, files?: VisionFile[]) => {
+  const handleSend = async (message: string, files?: VisionFile[], otherInputs?: any) => {
+    console.log('otherInputs', otherInputs)
     if (isResponsing) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
     }
     const data: Record<string, any> = {
-      inputs: currInputs,
+      inputs: { ...currInputs, ...otherInputs },
       query: message,
       conversation_id: isNewConversation ? null : currConversationId,
     }
@@ -644,7 +660,9 @@ const Main: FC = () => {
     setAPP_ID(appId)
     setChatNotStarted()
     setAppUnavailable(false)
-    await switchApp(appId)
+    const { app_code }: any = await switchApp(appId)
+    setApp_code(app_code)
+    globalThis.localStorage.setItem('app_code', app_code)
     globalThis.localStorage.setItem('APP_ID', appId)
   }
   const renderSidebar = () => {
@@ -720,6 +738,7 @@ const Main: FC = () => {
                   <Chat
                     currConversationId={currConversationId}
                     chatList={chatList}
+                    commandList={commandList}
                     onSend={handleSend}
                     onFeedback={handleFeedback}
                     isResponsing={isResponsing}

@@ -9,9 +9,8 @@ import s from '../style.module.css'
 import ImageGallery from '../../base/image-gallery'
 import Thought from '../thought'
 import { randomString } from '@/utils/string'
-import type { ChatItem, MessageRating, SpeechToTextSettings, TextToSpeechSettings, VisionFile } from '@/types/app'
+import type { ChatItem, MessageRating, TextToSpeechSettings, VisionFile } from '@/types/app'
 import Tooltip from '@/app/components/base/tooltip'
-import WorkflowProcess from '@/app/components/workflow/workflow-process'
 import { Markdown } from '@/app/components/base/markdown'
 import type { Emoji } from '@/types/tools'
 import CopyBtn from '@/app/components/base/copy-btn'
@@ -63,6 +62,7 @@ type IAnswerProps = {
   textToSpeechConfig?: TextToSpeechSettings
   isResponsing?: boolean
   isLast?: boolean
+  onSend?: (message: string, files: VisionFile[]) => void
   allToolIcons?: Record<string, string | Emoji>
 }
 
@@ -71,6 +71,7 @@ const Answer: FC<IAnswerProps> = ({
   item,
   feedbackDisabled = false,
   onFeedback,
+  onSend,
   textToSpeechConfig,
   isResponsing,
   isLast,
@@ -128,7 +129,7 @@ const Answer: FC<IAnswerProps> = ({
             innerContent: <IconWrapper><CopyBtn
               value={content}
               className='group-hover:block'
-            /></IconWrapper>
+            /></IconWrapper>,
           })}
           {(textToSpeechConfig?.enabled) && (
             <>
@@ -142,7 +143,7 @@ const Answer: FC<IAnswerProps> = ({
                       voice={textToSpeechConfig?.voice}
                       className='group-hover:block'
                     />
-                  </IconWrapper>
+                  </IconWrapper>,
               })}
             </>
           )}
@@ -167,7 +168,6 @@ const Answer: FC<IAnswerProps> = ({
       return []
     return list.filter(file => file.type === 'image' && file.belongs_to === 'assistant')
   }
-
   const agentModeAnswer = (
     <div>
       {agent_thoughts?.map((item, index) => (
@@ -209,9 +209,9 @@ const Answer: FC<IAnswerProps> = ({
         <div className={`${s.answerWrap} ${!isAgentMode} && w-[calc(100%-40px)]`}>
           <div className={`${s.answer} relative text-sm text-gray-900`}>
             <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl ${workflowProcess && 'min-w-[480px]'}`}>
-              {workflowProcess && (
+              {/* {workflowProcess && (
                 <WorkflowProcess data={workflowProcess} hideInfo />
-              )}
+              )} */}
               {(isResponsing && (isAgentMode ? (!content && (agent_thoughts || []).filter(item => !!item.thought || !!item.tool).length === 0) : !content))
                 ? (
                   <div className='flex items-center justify-center w-6 h-5'>
@@ -221,7 +221,7 @@ const Answer: FC<IAnswerProps> = ({
                 : (isAgentMode
                   ? agentModeAnswer
                   : (
-                    <Markdown content={content} />
+                    <Markdown content={content} onSend={onSend} />
                   ))}
             </div>
             <div className='absolute top-[-14px] right-[-14px] flex flex-row justify-end gap-1'>
