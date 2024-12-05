@@ -17,7 +17,7 @@ import threading
 import time
 import warnings
 
-from flask import Response
+from flask import Response, current_app
 
 from app_factory import create_app
 
@@ -120,6 +120,17 @@ def pool_stat():
         "recycle_time": db.engine.pool._recycle,
     }
 
+
+def print_routes():
+    with app.app_context():
+        print("\n=== 所有注册的路由 ===")
+        for rule in current_app.url_map.iter_rules():
+            print(f"路由: {rule.rule}")
+            print(f"方法: {', '.join(rule.methods)}")
+            print(f"终端点: {rule.endpoint}\n")
+
+# 在应用启动时直接调用
+# print_routes()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001)

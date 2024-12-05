@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, type FC } from 'react'
+import { type FC } from 'react'
 import type {
   EditorState,
 } from 'lexical'
@@ -21,10 +21,10 @@ import { CustomTextNode } from './plugins/custom-text/node'
 import OnBlurBlock from './plugins/on-blur-or-focus-block'
 import { textToEditorState } from './utils'
 import type {
-  MenuBlockType
+  MenuBlockType,
 } from './types'
 import BottomBlock from './plugins/bottom-block'
-import { ImageFile, VideoFile } from '@/types/app'
+import type { ImageFile, VideoFile } from '@/types/app'
 import XClose from '@/app/components/base/icons/line/x-close'
 
 export type PromptEditorProps = {
@@ -44,9 +44,9 @@ export type PromptEditorProps = {
   onSend?: () => void
   menuBlock?: MenuBlockType
   ImageFiles: ImageFile[]
-  VideoFiles: VideoFile[],
-  currentTag: any,
-  setCurrentTag?: (currentTag: any) => void,
+  VideoFiles: VideoFile[]
+  currentTag: any
+  setCurrentTag?: (currentTag: any) => void
   currConversationId?: string
 }
 
@@ -70,7 +70,7 @@ const PromptEditor: FC<PromptEditorProps> = ({
   menuBlock,
   currentTag,
   setCurrentTag,
-  currConversationId
+  currConversationId,
 }) => {
   const initialConfig = {
     namespace: 'prompt-editor',
@@ -95,7 +95,7 @@ const PromptEditor: FC<PromptEditorProps> = ({
     if (onChange)
       onChange(text)
   }
-
+  console.log('currentTag', currentTag)
 
   return (
     <LexicalComposer initialConfig={{ ...initialConfig, editable }}>
@@ -125,7 +125,7 @@ const PromptEditor: FC<PromptEditorProps> = ({
         <OnBlurBlock onBlur={onBlur} onFocus={onFocus} />
         <HistoryPlugin />
         <BottomBlock renderInputBottom={renderInputBottom} renderUpload={renderUpload} onSend={onSend}
-          query={value} ImageFiles={ImageFiles} VideoFiles={VideoFiles} currConversationId={currConversationId} />
+          query={value} ImageFiles={ImageFiles} VideoFiles={VideoFiles} currConversationId={currConversationId} currentTag={currentTag} />
       </div>
     </LexicalComposer>
   )

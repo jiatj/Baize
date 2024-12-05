@@ -49,22 +49,26 @@ def decode_jwt_token():
         if not uuid:
             print('Token is not issued by Baize ')
             raise Unauthorized('Token not valiated, not issued by Baize')
-        app_id = redis_client.get('app:'+uuid);
+        # 不使用redis缓存appid
+        # app_id = redis_client.get('app:'+uuid);
      
-        if not app_id:
-            print(' redis app_id is NoneType ')
-            raise Unauthorized('app id not found')
+        # if not app_id:
+        #     print(' redis app_id is NoneType ')
+        #     raise Unauthorized('app id not found')
         
-        app_id = app_id.decode()
+        # app_id = app_id.decode()
 
-        print('uuid='+uuid+' app_id='+app_id)
-        # app_code = decoded.get('app_code')
-
-        app_model = db.session.query(App).filter(App.id ==app_id).first()
+        # print('uuid='+uuid+' app_id='+app_id)
+        # 我们的前端传app_code，原来的前端只有passport传
+        if not app_code:
+            app_code = decoded.get('app_code')
+        site = db.session.query(Site).filter(Site.code == app_code).first()
+        
+        app_model = db.session.query(App).filter(App.id ==site.app_id).first()
         #app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
-        #site = db.session.query(Site).filter(Site.code == app_code).first()
+      
         if not app_model:
-            print(f'appid={app_id} not found ')
+            print(f'appid={site.app_id} not found ')
             raise NotFound()
         # if not app_code or not site:
         #     raise BadRequest("Site URL is no longer valid.")
@@ -85,7 +89,7 @@ def decode_jwt_token():
 
         raise Unauthorized(e.description)
 
-
+# 这个引用已经废弃
 def _validate_web_sso_token(decoded, system_features, app_code):
     app_web_sso_enabled = False
 

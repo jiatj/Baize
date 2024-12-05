@@ -57,7 +57,7 @@ class Auth2AppResource(Resource):
         # 缓存appid，如果没有，需要切换app
         if app_id !='0':
             # redis_client.setex('app.'+uuid, 24*60*60, app_id)
-            redis_client.set('app.'+uuid,  app_id)
+            redis_client.set('app:'+uuid,  app_id)
          
         return {
             'app_code': site.code,

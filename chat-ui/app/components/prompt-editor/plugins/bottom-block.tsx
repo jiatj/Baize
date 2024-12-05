@@ -2,11 +2,12 @@ import type { FC } from 'react'
 import { useEffect, useRef } from 'react'
 import {
   $getRoot,
+  $getSelection,
   COMMAND_PRIORITY_LOW,
   KEY_ENTER_COMMAND,
 } from 'lexical'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { ImageFile, VideoFile } from '@/types/app'
+import type { ImageFile, VideoFile } from '@/types/app'
 
 type BottomBlockProps = {
   onClear?: () => void
@@ -17,6 +18,7 @@ type BottomBlockProps = {
   ImageFiles?: ImageFile[]
   VideoFiles?: VideoFile[]
   currConversationId?: string
+  currentTag?: any
 }
 const BottomBlock: FC<BottomBlockProps> = ({
   onClear,
@@ -26,7 +28,8 @@ const BottomBlock: FC<BottomBlockProps> = ({
   ImageFiles,
   VideoFiles,
   query,
-  currConversationId
+  currConversationId,
+  currentTag,
 }) => {
   const [editor] = useLexicalComposerContext()
 
@@ -34,13 +37,21 @@ const BottomBlock: FC<BottomBlockProps> = ({
 
   const clearFn = () => {
     editor.update(() => {
-      $getRoot().clear();
+      $getRoot().clear()
     })
   }
 
   useEffect(() => {
     editor.update(() => {
-      $getRoot().clear();
+      const selection = $getSelection()
+      if (selection)
+        selection.insertText(`${currentTag.type}=${currentTag.name} `)
+    })
+  }, [currentTag])
+
+  useEffect(() => {
+    editor.update(() => {
+      $getRoot().clear()
     })
   }, [currConversationId])
 
@@ -48,13 +59,13 @@ const BottomBlock: FC<BottomBlockProps> = ({
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (payload) => {
-        const { shiftKey, key } = payload;
-        if (key == "Enter" && shiftKey == false) {
-          payload.preventDefault();
+        const { shiftKey, key } = payload
+        if (key == 'Enter' && shiftKey == false) {
+          payload.preventDefault()
 
           onSend()
           editor.update(() => {
-            $getRoot().clear();
+            $getRoot().clear()
           })
         }
 
@@ -62,11 +73,11 @@ const BottomBlock: FC<BottomBlockProps> = ({
         // editor.update(() => {
         //   $getRoot().clear();
         // })
-        return true;
+        return true
       },
       COMMAND_PRIORITY_LOW,
-    );
-  }, [editor, query, ImageFiles, VideoFiles, onSend]);
+    )
+  }, [editor, query, ImageFiles, VideoFiles, onSend])
 
   return <div className='h-[40px]'>
     {renderUpload()}

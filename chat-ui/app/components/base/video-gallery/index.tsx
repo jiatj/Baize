@@ -1,85 +1,12 @@
-'use client'
-import type { FC } from 'react'
-import React, { useState } from 'react'
-import cn from 'classnames'
-import s from './style.module.css'
-import VideoPreview from '@/app/components/base/video-uploader/video-preview'
+import React from 'react'
+import VideoPlayer from './VideoPlayer'
 
 type Props = {
-  videoSrcs: string[]
-  videoImageSrcs: string[]
+  srcs: string[]
 }
 
-const getWidthStyle = (imgNum: number) => {
-  if (imgNum === 1) {
-    return {
-      maxWidth: '100%',
-    }
-  }
-
-  if (imgNum === 2 || imgNum === 4) {
-    return {
-      width: 'calc(50% - 4px)',
-    }
-  }
-
-  return {
-    width: 'calc(33.3333% - 5.3333px)',
-  }
+const VideoGallery: React.FC<Props> = ({ srcs }) => {
+  return (<><br/>{srcs.map((src, index) => (<><br/><VideoPlayer key={`video_${index}`} src={src}/></>))}</>)
 }
 
-const ImageGallery: FC<Props> = ({
-  videoSrcs,
-  videoImageSrcs
-}) => {
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('')
-
-  const imgNum = videoImageSrcs.length
-  const imgStyle = getWidthStyle(imgNum)
-  return (
-    <div className={cn(s[`img-${imgNum}`], 'flex flex-wrap')}>
-      {/* TODO: support preview */}
-      {videoImageSrcs.map((src, index) => (
-        <img
-          key={index}
-          className={s.item}
-          style={imgStyle}
-          src={src}
-          alt=''
-          onClick={() => setImagePreviewUrl(videoSrcs[index])}
-        />
-      ))}
-      {
-        imagePreviewUrl && (
-          <VideoPreview
-            url={imagePreviewUrl}
-            onCancel={() => setImagePreviewUrl('')}
-          />
-        )
-      }
-    </div>
-  )
-}
-
-export default React.memo(ImageGallery)
-
-export const ImageGalleryTest = () => {
-  const imgGallerySrcs = (() => {
-    const srcs = []
-    for (let i = 0; i < 6; i++)
-      // srcs.push('https://placekitten.com/640/360')
-      // srcs.push('https://placekitten.com/360/640')
-      srcs.push('https://placekitten.com/360/360')
-
-    return srcs
-  })()
-  return (
-    <div className='space-y-2'>
-      {imgGallerySrcs.map((_, index) => (
-        <div key={index} className='p-4 pb-2 rounded-lg bg-[#D1E9FF80]'>
-          <ImageGallery srcs={imgGallerySrcs.slice(0, index + 1)} />
-        </div>
-      ))}
-    </div>
-  )
-}
+export default React.memo(VideoGallery)

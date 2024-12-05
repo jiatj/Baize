@@ -1,45 +1,339 @@
 import ReactMarkdown from 'react-markdown'
+import ReactEcharts from 'echarts-for-react'
 import 'katex/dist/katex.min.css'
 import RemarkMath from 'remark-math'
 import RemarkBreaks from 'remark-breaks'
 import RehypeKatex from 'rehype-katex'
 import RemarkGfm from 'remark-gfm'
+import RehypeRaw from 'rehype-raw'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { atelierHeathLight } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import type { RefObject } from 'react'
+import { Component, memo, useEffect, useMemo, useRef, useState } from 'react'
+import type { CodeComponent } from 'react-markdown/lib/ast-to-react'
+import MarkdownForm from './markdown-blocks/form'
+import cn from '@/utils/classnames'
+import CopyBtn from '@/app/components/base/copy-btn'
+import SVGBtn from '@/app/components/base/svg'
+import Flowchart from '@/app/components/base/mermaid'
+import ImageGallery from '@/app/components/base/image-gallery'
+import { useChatContext } from '@/app/components/chat/context'
+import VideoGallery from '@/app/components/base/video-gallery'
+import AudioGallery from '@/app/components/base/audio-gallery'
+import SVGRenderer from '@/app/components/base/svg-gallery'
+import MarkdownButton from '@/app/components/base/markdown-blocks/button'
 
-export function Markdown(props: { content: string }) {
+const capitalizationLanguageNameMap: Record<string, string> = {
+  sql: 'SQL',
+  javascript: 'JavaScript',
+  java: 'Java',
+  typescript: 'TypeScript',
+  vbscript: 'VBScript',
+  css: 'CSS',
+  html: 'HTML',
+  xml: 'XML',
+  php: 'PHP',
+  python: 'Python',
+  yaml: 'Yaml',
+  mermaid: 'Mermaid',
+  markdown: 'MarkDown',
+  makefile: 'MakeFile',
+  echarts: 'ECharts',
+  shell: 'Shell',
+  powershell: 'PowerShell',
+  json: 'JSON',
+  latex: 'Latex',
+  svg: 'SVG',
+}
+const getCorrectCapitalizationLanguageName = (language: string) => {
+  if (!language)
+    return 'Plain'
+
+  if (language in capitalizationLanguageNameMap)
+    return capitalizationLanguageNameMap[language]
+
+  return language.charAt(0).toUpperCase() + language.substring(1)
+}
+
+const preprocessLaTeX = (content: string) => {
+  if (typeof content !== 'string')
+    return content
+  return content.replace(/\\\[(.*?)\\\]/g, (_, equation) => `$$${equation}$$`)
+    .replace(/\\\((.*?)\\\)/g, (_, equation) => `$$${equation}$$`)
+    .replace(/(^|[^\\])\$(.+?)\$/g, (_, prefix, equation) => `${prefix}$${equation}$`)
+}
+
+export function PreCode(props: { children: any }) {
+  const ref = useRef<HTMLPreElement>(null)
+
   return (
-    <div className="markdown-body">
+    <pre ref={ref}>
+      <span
+        className="copy-code-button"
+      ></span>
+      {props.children}
+    </pre>
+  )
+}
+
+// eslint-disable-next-line unused-imports/no-unused-vars
+const useLazyLoad = (ref: RefObject<Element>): boolean => {
+  const [isIntersecting, setIntersecting] = useState<boolean>(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIntersecting(true)
+        observer.disconnect()
+      }
+    })
+
+    if (ref.current)
+      observer.observe(ref.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [ref])
+
+  return isIntersecting
+}
+
+// **Add code block
+// Avoid error #185 (Maximum update depth exceeded.
+// This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate.
+// React limits the number of nested updates to prevent infinite loops.)
+// Reference A: https://reactjs.org/docs/error-decoder.html?invariant=185
+// Reference B1: https://react.dev/reference/react/memo
+// Reference B2: https://react.dev/reference/react/useMemo
+// ****
+// The original error that occurred in the streaming response during the conversation:
+// Error: Minified React error 185;
+// visit https://reactjs.org/docs/error-decoder.html?invariant=185 for the full message
+// or use the non-minified dev environment for full errors and additional helpful warnings.
+
+const CodeBlock: CodeComponent = memo(({ inline, className, children, ...props }) => {
+  const [isSVG, setIsSVG] = useState(true)
+  const match = /language-(\w+)/.exec(className || '')
+  const language = match?.[1]
+  const languageShowName = getCorrectCapitalizationLanguageName(language || '')
+  const chartData = useMemo(() => {
+    if (language === 'echarts') {
+      try {
+        return JSON.parse(String(children).replace(/\n$/, ''))
+      }
+      catch (error) { }
+    }
+    return JSON.parse('{"title":{"text":"ECharts error - Wrong JSON format."}}')
+  }, [language, children])
+
+  const renderCodeContent = useMemo(() => {
+    const content = String(children).replace(/\n$/, '')
+    if (language === 'mermaid' && isSVG) {
+      return <Flowchart PrimitiveCode={content} />
+    }
+    else if (language === 'echarts') {
+      return (
+        <div style={{ minHeight: '350px', minWidth: '700px' }}>
+          <ErrorBoundary>
+            <ReactEcharts option={chartData} />
+          </ErrorBoundary>
+        </div>
+      )
+    }
+    else if (language === 'svg' && isSVG) {
+      return (
+        <ErrorBoundary>
+          <SVGRenderer content={content} />
+        </ErrorBoundary>
+      )
+    }
+    else {
+      return (
+        <SyntaxHighlighter
+          {...props}
+          style={atelierHeathLight}
+          customStyle={{
+            paddingLeft: 12,
+            backgroundColor: '#fff',
+          }}
+          language={match?.[1]}
+          showLineNumbers
+          PreTag="div"
+        >
+          {content}
+        </SyntaxHighlighter>
+      )
+    }
+  }, [language, match, props, children, chartData, isSVG])
+
+  if (inline || !match)
+    return <code {...props} className={className}>{children}</code>
+
+  return (
+    <div>
+      <div
+        className='flex justify-between h-8 items-center p-1 pl-3 border-b'
+        style={{
+          borderColor: 'rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <div className='text-[13px] text-gray-500 font-normal'>{languageShowName}</div>
+        <div style={{ display: 'flex' }}>
+          {(['mermaid', 'svg']).includes(language!) && <SVGBtn isSVG={isSVG} setIsSVG={setIsSVG} />}
+          <CopyBtn
+            className='mr-1'
+            value={String(children).replace(/\n$/, '')}
+            isPlain
+          />
+        </div>
+      </div>
+      {renderCodeContent}
+    </div>
+  )
+})
+CodeBlock.displayName = 'CodeBlock'
+
+const VideoBlock: CodeComponent = memo(({ node }) => {
+  const srcs = node.children.filter(child => 'properties' in child).map(child => (child as any).properties.src)
+  if (srcs.length === 0)
+    return null
+  return <VideoGallery key={srcs.join()} srcs={srcs} />
+})
+VideoBlock.displayName = 'VideoBlock'
+
+const AudioBlock: CodeComponent = memo(({ node }) => {
+  const srcs = node.children.filter(child => 'properties' in child).map(child => (child as any).properties.src)
+  if (srcs.length === 0)
+    return null
+  return <AudioGallery key={srcs.join()} srcs={srcs} />
+})
+AudioBlock.displayName = 'AudioBlock'
+
+const Paragraph = (paragraph: any) => {
+  const { node }: any = paragraph
+  const children_node = node.children
+  if (children_node && children_node[0] && 'tagName' in children_node[0] && children_node[0].tagName === 'img') {
+    return (
+      <>
+        <ImageGallery srcs={[children_node[0].properties.src]} />
+        <p>{paragraph.children.slice(1)}</p>
+      </>
+    )
+  }
+  return <p>{paragraph.children}</p>
+}
+
+const Img = ({ src }: any) => {
+  return (<ImageGallery srcs={[src]} />)
+}
+
+const Link = ({ node, ...props }: any) => {
+  if (node.properties?.href && node.properties.href?.toString().startsWith('abbr')) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { onSend } = useChatContext()
+    const hidden_text = decodeURIComponent(node.properties.href.toString().split('abbr:')[1])
+
+    return <abbr className="underline decoration-dashed !decoration-primary-700 cursor-pointer" onClick={() => onSend?.(hidden_text)} title={node.children[0]?.value}>{node.children[0]?.value}</abbr>
+  }
+  else {
+    return <a {...props} target="_blank" className="underline decoration-dashed !decoration-primary-700 cursor-pointer">{node.children[0] ? node.children[0]?.value : 'Download'}</a>
+  }
+}
+
+export function Markdown(props: { content: string; className?: string; onSend?: (text: string) => void }) {
+  // const content = `
+  // # 1.确定范围
+  // <form formType="questionnaire">
+  //   <label>使用场景：</label>
+  //   <checkbox type="checkbox" qid="1">
+  //     自己家里
+  //   </checkbox>
+  //    <checkbox type="checkbox" qid="2">
+  //     公司
+  //   </checkbox>
+  //   <label>设备类型：</label>
+  //   <checkbox type="checkbox" qid="3">
+  //     电脑
+  //   </checkbox>
+  //   <checkbox type="checkbox" qid="4">
+  //     手机
+  //   </checkbox>
+  //   <button type="submit">提交</button>
+  // </form>
+  //   `
+  //   const content = `
+  // # 1.确定范围
+  //   <form formType="notice">
+  //     <notice messageid="1">
+  //       使用场景使用场景使用场景使用场景使用场景使用场景
+  //     </notice>
+  //   </form>
+  //   `
+  const latexContent = preprocessLaTeX(props.content)
+  return (
+    <div className={cn(props.className, 'markdown-body')}>
       <ReactMarkdown
-        remarkPlugins={[RemarkMath, RemarkGfm, RemarkBreaks]}
+        remarkPlugins={[RemarkGfm, RemarkMath, RemarkBreaks]}
         rehypePlugins={[
           RehypeKatex,
-        ]}
-        components={{
-          code({ node, inline, className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className || '')
-            return (!inline && match)
-              ? (
-                <SyntaxHighlighter
-                  {...props}
-                  children={String(children).replace(/\n$/, '')}
-                  style={atelierHeathLight}
-                  language={match[1]}
-                  showLineNumbers
-                  PreTag="div"
-                />
-              )
-              : (
-                <code {...props} className={className}>
-                  {children}
-                </code>
-              )
+          RehypeRaw as any,
+          // The Rehype plug-in is used to remove the ref attribute of an element
+          () => {
+            return (tree) => {
+              const iterate = (node: any) => {
+                if (node.type === 'element' && !node.properties?.src && node.properties?.ref && node.properties.ref.startsWith('{') && node.properties.ref.endsWith('}'))
+                  delete node.properties.ref
+
+                if (node.children)
+                  node.children.forEach(iterate)
+              }
+              tree.children.forEach(iterate)
+            }
           },
+        ]}
+        disallowedElements={['script', 'iframe', 'head', 'html', 'meta', 'link', 'style', 'body']}
+        components={{
+          code: CodeBlock,
+          img: Img,
+          video: VideoBlock,
+          audio: AudioBlock,
+          a: Link,
+          p: Paragraph,
+          button: MarkdownButton,
+          form: node => MarkdownForm({ ...node, onSend: props.onSend }),
         }}
-        linkTarget={'_blank'}
+        linkTarget='_blank'
       >
-        {props.content}
+        {/* Markdown detect has problem. */}
+        {latexContent}
       </ReactMarkdown>
     </div>
   )
+}
+
+// **Add an ECharts runtime error handler
+// Avoid error #7832 (Crash when ECharts accesses undefined objects)
+// This can happen when a component attempts to access an undefined object that references an unregistered map, causing the program to crash.
+
+export default class ErrorBoundary extends Component {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    this.setState({ hasError: true })
+    console.error(error, errorInfo)
+  }
+
+  render() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    if (this.state.hasError)
+      return <div>Oops! An error occurred. This could be due to an ECharts runtime error or invalid SVG content. <br />(see the browser console for more information)</div>
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    return this.props.children
+  }
 }

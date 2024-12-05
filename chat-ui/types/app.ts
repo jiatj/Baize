@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react'
 import type { Annotation } from './log'
+import type { Emoji } from './tools'
 import type { Locale } from '@/i18n'
 import type { ThoughtItem } from '@/app/components/chat/type'
 
@@ -147,7 +149,7 @@ export type ImageFile = {
   progress: number
   url: string
   base64Url?: string
-  deleted?: boolean,
+  deleted?: boolean
   fType?: string | undefined
 }
 
@@ -164,14 +166,13 @@ export type VideoFile = {
   fType?: string
 }
 
-
 export type VisionFile = {
   id?: string
   type: string
   transfer_method: TransferMethod
   url: string
   upload_file_id: string
-  belongs_to?: string,
+  belongs_to?: string
   Thumbnail64Url: string
 }
 
@@ -245,4 +246,51 @@ export enum CodeLanguage {
   python3 = 'python3',
   javascript = 'javascript',
   json = 'json',
+}
+
+export enum TransferMethod {
+  all = 'all',
+  local_file = 'local_file',
+  remote_url = 'remote_url',
+}
+
+export type Feedback = {
+  rating: 'like' | 'dislike' | null
+}
+
+export type FileEntity = {
+  id: string
+  name: string
+  size: number
+  type: string
+  progress: number
+  transferMethod: TransferMethod
+  supportFileType: string
+  originalFile?: File
+  uploadedId?: string
+  base64Url?: string
+  url?: string
+  isRemote?: boolean
+}
+
+export type ChatProps = {
+  chatList: ChatItem[]
+  config?: any
+  isResponding?: boolean
+  showPromptLog?: boolean
+  questionIcon?: ReactNode
+  answerIcon?: ReactNode
+  onRegenerate?: (chatItem: ChatItem) => void
+  onSend?: (message: string, files?: FileEntity[], last_answer?: ChatItem | null) => void
+  allToolIcons?: Record<string, string | Emoji>
+  onAnnotationEdited?: (question: string, answer: string, index: number) => void
+  onAnnotationAdded?: (annotationId: string, authorName: string, question: string, answer: string, index: number) => void
+  onAnnotationRemoved?: (index: number) => void
+  onFeedback?: (messageId: string, feedback: Feedback) => void
+}
+
+export type CommandItem = {
+  type: string
+  name: string
+  value: string
 }
