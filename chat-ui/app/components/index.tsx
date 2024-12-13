@@ -683,6 +683,10 @@ const Main: FC = () => {
       />
     )
   }
+
+  const closeChatIframe = () => {
+    window.parent.postMessage({ type: 'closeChatIframe' }, '*')
+  }
   // if (appUnavailable)
   //   return <AppUnavailable isUnknwonReason={isUnknwonReason} errMessage={!hasSetAppConfig ? 'Please set APP_ID and API_KEY in config/index.tsx' : ''} />
   if (!APP_ID || !APP_INFO)
@@ -694,6 +698,7 @@ const Main: FC = () => {
         isMobile={isMobile}
         onShowSideBar={showSidebar}
         onCreateNewChat={() => handleConversationIdChange('-1')}
+        onCloseChatIframe={closeChatIframe}
       />
       <div className="flex rounded-t-2xl bg-white overflow-hidden">
         {/* sidebar */}

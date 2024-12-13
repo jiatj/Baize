@@ -40,6 +40,8 @@ const SwrInitor = ({
     globalThis.localStorage?.setItem('access_token', access_token)
     globalThis.localStorage?.setItem('app_code', app_code)
     globalThis.localStorage?.setItem('apps', JSON.stringify(apps))
+    globalThis.localStorage?.setItem('isIframe', '1')
+    console.log('isIframe', globalThis.localStorage?.getItem('isIframe'))
     let appid: string = globalThis.localStorage?.getItem('APP_ID') || ''
     if ((appid === null || appid === '' || appid === undefined) && apps.length > 0)
       appid = (apps.find((app: any) => app.actived === 'y'))?.appId
