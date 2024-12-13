@@ -18,7 +18,7 @@ const SwrInitor = ({
   const code = searchParams.get('code')
   const token = searchParams.get('token')
   const from = searchParams.get('from')
-  console.log('token', token)
+  console.log('token', token, 'code', code, 'from', from)
   const accessTokenFromLocalStorage = localStorage?.getItem('access_token')
   const [init, setInit] = useState(false)
 
