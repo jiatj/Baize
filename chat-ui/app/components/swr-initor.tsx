@@ -17,6 +17,7 @@ const SwrInitor = ({
   const searchParams = useSearchParams()
   const code = searchParams.get('code')
   const token = searchParams.get('token')
+  const from = searchParams.get('from')
   console.log('token', token)
   const accessTokenFromLocalStorage = localStorage?.getItem('access_token')
   const [init, setInit] = useState(false)
@@ -40,8 +41,10 @@ const SwrInitor = ({
     globalThis.localStorage?.setItem('access_token', access_token)
     globalThis.localStorage?.setItem('app_code', app_code)
     globalThis.localStorage?.setItem('apps', JSON.stringify(apps))
-    globalThis.localStorage?.setItem('isIframe', '1')
-    console.log('isIframe', globalThis.localStorage?.getItem('isIframe'))
+    if (from === 'electron') {
+      globalThis.localStorage?.setItem('isIframe', '1')
+      console.log('isIframe', globalThis.localStorage?.getItem('isIframe'))
+    }
     let appid: string = globalThis.localStorage?.getItem('APP_ID') || ''
     if ((appid === null || appid === '' || appid === undefined) && apps.length > 0)
       appid = (apps.find((app: any) => app.actived === 'y'))?.appId
@@ -73,7 +76,7 @@ const SwrInitor = ({
       // return
       // let url = API_URL + `/sys/thirdLogin/render/${source}`
       console.log(isDev)
-      const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : 'http://192.168.10.70/bot'
+      const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : 'http://yuntengwangluo.3322.org:8081/bot'
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
       const url = `http://yuntengwangluo.3322.org:8082/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
       const u = navigator.userAgent
