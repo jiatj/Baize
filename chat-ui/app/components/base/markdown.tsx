@@ -15,7 +15,7 @@ import MarkdownForm from './markdown-blocks/form'
 import cn from '@/utils/classnames'
 import CopyBtn from '@/app/components/base/copy-btn'
 import SVGBtn from '@/app/components/base/svg'
-import Flowchart from '@/app/components/base/mermaid'
+// import Flowchart from '@/app/components/base/mermaid'
 import ImageGallery from '@/app/components/base/image-gallery'
 import { useChatContext } from '@/app/components/chat/context'
 import VideoGallery from '@/app/components/base/video-gallery'
@@ -130,7 +130,8 @@ const CodeBlock: CodeComponent = memo(({ inline, className, children, ...props }
   const renderCodeContent = useMemo(() => {
     const content = String(children).replace(/\n$/, '')
     if (language === 'mermaid' && isSVG) {
-      return <Flowchart PrimitiveCode={content} />
+      // return <Flowchart PrimitiveCode={content} />
+      return <div></div>
     }
     else if (language === 'echarts') {
       return (
