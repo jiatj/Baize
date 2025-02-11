@@ -92,7 +92,6 @@ const Chat: FC<IChatProps> = ({
 
   const [query, setQuery] = React.useState('')
   const handleContentChange = (e: any) => {
-    console.log('dddddd', e)
     const value = e
     setQuery(value)
   }
@@ -140,7 +139,6 @@ const Chat: FC<IChatProps> = ({
     if (!valid() || (checkCanSend && !checkCanSend()))
       return
     let otherInputs = {}
-    console.log('cu', currentTag)
     if (Object.keys(currentTag).length > 0) {
       otherInputs = {
         command: {
@@ -149,7 +147,6 @@ const Chat: FC<IChatProps> = ({
         },
       }
     }
-    console.log('ot', otherInputs)
     onSend(query, [...files.filter(file => file.progress !== -1).map(fileItem => ({
       type: 'image',
       transfer_method: fileItem.type,

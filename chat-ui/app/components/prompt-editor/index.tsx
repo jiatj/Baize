@@ -95,7 +95,6 @@ const PromptEditor: FC<PromptEditorProps> = ({
     if (onChange)
       onChange(text)
   }
-  console.log('currentTag', currentTag)
 
   return (
     <LexicalComposer initialConfig={{ ...initialConfig, editable }}>

@@ -149,7 +149,6 @@ const Main: FC = () => {
       fetchChatList(currConversationId).then((res: any) => {
         const { data } = res
         const newChatList: ChatItem[] = generateNewChatListWithOpenstatement(notSyncToStateIntroduction, notSyncToStateInputs)
-        console.log('data', data)
         data.forEach((item: any) => {
           newChatList.push({
             id: `question-${item.id}`,
@@ -167,7 +166,6 @@ const Main: FC = () => {
             message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
           })
         })
-        console.log('newChatList', newChatList)
         setChatList(newChatList)
       })
     }
@@ -207,7 +205,6 @@ const Main: FC = () => {
     // if new chat is already exist, do not create new chat
     if (conversationList.some(item => item.id === '-1'))
       return
-
     setConversationList(produce(conversationList, (draft) => {
       draft.unshift({
         id: '-1',
@@ -242,7 +239,6 @@ const Main: FC = () => {
   const [commandList, setCommandList] = useState([] as CommandItem[])
   const getCommondListByConversationId = async (conversation_id: string) => {
     const comList: { result: CommandItem[]; code: number } = await extApi('command', 'order', { conversation_id }) as { result: CommandItem[]; code: number }
-    console.log('comList', comList)
     setCommandList(comList?.result as CommandItem[])
   }
   // init
@@ -257,6 +253,12 @@ const Main: FC = () => {
         // handle current conversation id
         const { data: conversations, has_more: hasMore } = conversationData as { data: ConversationItem[]; has_more: boolean }
         const _conversationId = getConversationIdFromStorage(APP_ID)
+        console.log('conversationId', _conversationId)
+        if (_conversationId === undefined)
+          handleConversationIdChange('-1')
+        else
+          handleConversationIdChange(_conversationId)
+
         getCommondListByConversationId(_conversationId)
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
@@ -285,7 +287,8 @@ const Main: FC = () => {
 
         if (isNotNewConversation)
           setCurrConversationId(_conversationId, APP_ID, false)
-
+        // else
+        //   handleConversationIdChange('-1')
         setInited(true)
       }
       catch (e: any) {
@@ -367,7 +370,6 @@ const Main: FC = () => {
   }
 
   const handleSend = async (message: string, files?: VisionFile[], otherInputs?: any) => {
-    console.log('otherInputs', otherInputs)
     if (isResponsing) {
       notify({ type: 'info', message: t('app.errorMessage.waitForResponse') })
       return
@@ -657,10 +659,10 @@ const Main: FC = () => {
   }
 
   const handleAppIdChange = async (appId: string) => {
-    setAPP_ID(appId)
     setChatNotStarted()
     setAppUnavailable(false)
     const { app_code }: any = await switchApp(appId)
+    setAPP_ID(appId)
     setApp_code(app_code)
     globalThis.localStorage.setItem('app_code', app_code)
     globalThis.localStorage.setItem('APP_ID', appId)

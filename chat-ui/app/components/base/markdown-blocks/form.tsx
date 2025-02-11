@@ -22,7 +22,6 @@ enum SUPPORTED_TYPES {
   NUMBER = 'number',
 }
 const MarkdownForm = ({ node, onSend }: any) => {
-  console.log('node', node, onSend)
   // const supportedTypes = ['text', 'password', 'email', 'number']
   //   <form data-format="text">
   //      <label for="username">Username:</label>
@@ -77,13 +76,11 @@ const MarkdownForm = ({ node, onSend }: any) => {
         data: result,
       }
       const sendContent = '提交成功' + `*****${JSON.stringify(params)}*****`
-      console.log('sendContent', sendContent)
       onSend?.(sendContent)
     }
     else {
       const format = node.properties.dataFormat || DATA_FORMAT.TEXT
       const result = getFormValues(node.children)
-      console.log('result', result)
       if (format === DATA_FORMAT.JSON) {
         onSend?.(JSON.stringify(result))
       }
@@ -146,7 +143,6 @@ const MarkdownForm = ({ node, onSend }: any) => {
                 placeholder={child.properties.placeholder}
                 checked={formValues[child.properties.name]}
                 onChange={(e) => {
-                  console.log('eee', e, child.properties.name, formValues[child.properties.name])
                   setFormValues(prevValues => ({
                     ...prevValues,
                     [child.properties.name]: e.target.checked,
