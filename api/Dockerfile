@@ -1,10 +1,10 @@
 # base image
-FROM python:3.10-slim-bookworm AS base
+FROM python:3.12-slim-bookworm AS base
 
 WORKDIR /app/api
 
 # Install Poetry
-ENV POETRY_VERSION=1.8.3
+ENV POETRY_VERSION=2.0.1
 
 # if you located in China, you can use aliyun mirror to speed up
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://mirrors.aliyun.com/pypi/simple/
@@ -58,6 +58,12 @@ RUN echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.
     # && apt-get update \
     # For Security
     && apt-get install -y --no-install-recommends zlib1g=1:1.3.dfsg+really1.3.1-1+b1 expat=2.6.4-1 libldap-2.5-0=2.5.18+dfsg-3+b1 perl=5.40.0-7 libsqlite3-0=3.46.1-1 \
+        libmagic1 \
+        # install libmagic to support the use of python-magic guess MIMETYPE
+        media-types \
+        # install a package to improve the accuracy of guessing mime type and file extension
+        fonts-noto-cjk \
+        # install a chinese font to support the use of tools like matplotlib
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
@@ -69,13 +75,16 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 # Download nltk data
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
 
+ENV TIKTOKEN_CACHE_DIR=/app/api/.tiktoken_cache
+
+RUN python -c "import tiktoken; tiktoken.encoding_for_model('gpt2')"
+
 # Copy source code
 COPY . /app/api/
 
 # Copy entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
 
 ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA}

@@ -8,7 +8,7 @@ from core.variables.variables import StringVariable
 from core.workflow.entities.node_entities import NodeRunResult
 from core.workflow.nodes.document_extractor import DocumentExtractorNode, DocumentExtractorNodeData
 from core.workflow.nodes.document_extractor.node import (
-    _extract_text_from_doc,
+    _extract_text_from_docx,
     _extract_text_from_pdf,
     _extract_text_from_plain_text,
 )
@@ -63,17 +63,24 @@ def test_run_invalid_variable_type(document_extractor_node, mock_graph_runtime_s
 
 
 @pytest.mark.parametrize(
-    ("mime_type", "file_content", "expected_text", "transfer_method"),
+    ("mime_type", "file_content", "expected_text", "transfer_method", "extension"),
     [
-        ("text/plain", b"Hello, world!", ["Hello, world!"], FileTransferMethod.LOCAL_FILE),
-        ("application/pdf", b"%PDF-1.5\n%Test PDF content", ["Mocked PDF content"], FileTransferMethod.LOCAL_FILE),
+        ("text/plain", b"Hello, world!", ["Hello, world!"], FileTransferMethod.LOCAL_FILE, ".txt"),
+        (
+            "application/pdf",
+            b"%PDF-1.5\n%Test PDF content",
+            ["Mocked PDF content"],
+            FileTransferMethod.LOCAL_FILE,
+            ".pdf",
+        ),
         (
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             b"PK\x03\x04",
             ["Mocked DOCX content"],
-            FileTransferMethod.LOCAL_FILE,
+            FileTransferMethod.REMOTE_URL,
+            "",
         ),
-        ("text/plain", b"Remote content", ["Remote content"], FileTransferMethod.REMOTE_URL),
+        ("text/plain", b"Remote content", ["Remote content"], FileTransferMethod.REMOTE_URL, None),
     ],
 )
 def test_run_extract_text(
@@ -83,6 +90,7 @@ def test_run_extract_text(
     file_content,
     expected_text,
     transfer_method,
+    extension,
     monkeypatch,
 ):
     document_extractor_node.graph_runtime_state = mock_graph_runtime_state
@@ -92,6 +100,7 @@ def test_run_extract_text(
     mock_file.transfer_method = transfer_method
     mock_file.related_id = "test_file_id" if transfer_method == FileTransferMethod.LOCAL_FILE else None
     mock_file.remote_url = "https://example.com/file.txt" if transfer_method == FileTransferMethod.REMOTE_URL else None
+    mock_file.extension = extension
 
     mock_array_file_segment = Mock(spec=ArrayFileSegment)
     mock_array_file_segment.value = [mock_file]
@@ -111,12 +120,12 @@ def test_run_extract_text(
         monkeypatch.setattr("core.workflow.nodes.document_extractor.node._extract_text_from_pdf", mock_pdf_extract)
     elif mime_type.startswith("application/vnd.openxmlformats"):
         mock_docx_extract = Mock(return_value=expected_text[0])
-        monkeypatch.setattr("core.workflow.nodes.document_extractor.node._extract_text_from_doc", mock_docx_extract)
+        monkeypatch.setattr("core.workflow.nodes.document_extractor.node._extract_text_from_docx", mock_docx_extract)
 
     result = document_extractor_node._run()
 
     assert isinstance(result, NodeRunResult)
-    assert result.status == WorkflowNodeExecutionStatus.SUCCEEDED
+    assert result.status == WorkflowNodeExecutionStatus.SUCCEEDED, result.error
     assert result.outputs is not None
     assert result.outputs["text"] == expected_text
 
@@ -131,6 +140,17 @@ def test_extract_text_from_plain_text():
     assert text == "Hello, world!"
 
 
+def test_extract_text_from_plain_text_non_utf8():
+    import tempfile
+
+    non_utf8_content = b"Hello, world\xa9."  # \xA9 represents © in Latin-1
+    with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+        temp_file.write(non_utf8_content)
+        temp_file.seek(0)
+        text = _extract_text_from_plain_text(temp_file.read())
+    assert text == "Hello, world."
+
+
 @patch("pypdfium2.PdfDocument")
 def test_extract_text_from_pdf(mock_pdf_document):
     mock_page = Mock()
@@ -143,14 +163,14 @@ def test_extract_text_from_pdf(mock_pdf_document):
 
 
 @patch("docx.Document")
-def test_extract_text_from_doc(mock_document):
+def test_extract_text_from_docx(mock_document):
     mock_paragraph1 = Mock()
     mock_paragraph1.text = "Paragraph 1"
     mock_paragraph2 = Mock()
     mock_paragraph2.text = "Paragraph 2"
     mock_document.return_value.paragraphs = [mock_paragraph1, mock_paragraph2]
 
-    text = _extract_text_from_doc(b"PK\x03\x04")
+    text = _extract_text_from_docx(b"PK\x03\x04")
     assert text == "Paragraph 1\nParagraph 2"
 
 

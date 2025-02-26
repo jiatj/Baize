@@ -257,10 +257,6 @@ export const fetchFileUploadConfig: Fetcher<FileUploadConfigResponse, { url: str
   return get<FileUploadConfigResponse>(url)
 }
 
-export const fetchFreeQuotaVerify: Fetcher<{ result: string; flag: boolean; reason: string }, string> = (url) => {
-  return get(url) as Promise<{ result: string; flag: boolean; reason: string }>
-}
-
 export const fetchNotionConnection: Fetcher<{ data: string }, string> = (url) => {
   return get(url) as Promise<{ data: string }>
 }
@@ -298,7 +294,7 @@ export const moderate = (url: string, body: { app_id: string; text: string }) =>
 }
 
 type RetrievalMethodsRes = {
-  'retrieval_method': RETRIEVE_METHOD[]
+  retrieval_method: RETRIEVE_METHOD[]
 }
 export const fetchSupportRetrievalMethods: Fetcher<RetrievalMethodsRes, string> = (url) => {
   return get<RetrievalMethodsRes>(url)
@@ -324,9 +320,10 @@ export const verifyForgotPasswordToken: Fetcher<CommonResponse & { is_valid: boo
 export const changePasswordWithToken: Fetcher<CommonResponse, { url: string; body: { token: string; new_password: string; password_confirm: string } }> = ({ url, body }) =>
   post<CommonResponse>(url, { body })
 
-export const fetchRemoteFileInfo = (url: string) => {
-  return get<{ file_type: string; file_length: number }>(`/remote-files/${url}`)
+export const uploadRemoteFileInfo = (url: string, isPublic?: boolean) => {
+  return post<{ id: string; name: string; size: number; mime_type: string; url: string }>('/remote-files/upload', { body: { url } }, { isPublicAPI: isPublic })
 }
+
 export const sendEMailLoginCode = (email: string, language = 'en-US') =>
   post<CommonResponse & { data: string }>('/email-code-login', { body: { email, language } })
 
@@ -338,3 +335,12 @@ export const sendResetPasswordCode = (email: string, language = 'en-US') =>
 
 export const verifyResetPasswordCode = (body: { email: string;code: string;token: string }) =>
   post<CommonResponse & { is_valid: boolean }>('/forgot-password/validity', { body })
+
+export const sendDeleteAccountCode = () =>
+  get<CommonResponse & { data: string }>('/account/delete/verify')
+
+export const verifyDeleteAccountCode = (body: { code: string;token: string }) =>
+  post<CommonResponse & { is_valid: boolean }>('/account/delete', { body })
+
+export const submitDeleteAccountFeedback = (body: { feedback: string;email: string }) =>
+  post<CommonResponse>('/account/delete/feedback', { body })

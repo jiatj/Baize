@@ -1,14 +1,14 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from flask_login import current_user
-from flask_restful import Resource, marshal_with, reqparse
+from flask_login import current_user  # type: ignore
+from flask_restful import Resource, marshal_with, reqparse  # type: ignore
+from sqlalchemy.orm import Session
 from werkzeug.exceptions import Forbidden, NotFound
 
 from constants.languages import supported_language
 from controllers.console import api
 from controllers.console.app.wraps import get_app_model
-from controllers.console.setup import setup_required
-from controllers.console.wraps import account_initialization_required
+from controllers.console.wraps import account_initialization_required, setup_required
 from extensions.ext_database import db
 from fields.app_fields import app_site_fields
 from libs.login import login_required
@@ -51,33 +51,37 @@ class AppSite(Resource):
         if not current_user.is_editor:
             raise Forbidden()
 
-        site = db.session.query(Site).filter(Site.app_id == app_model.id).one_or_404()
+        with Session(db.engine) as session:
+            site = session.query(Site).filter(Site.app_id == app_model.id).first()
 
-        for attr_name in [
-            "title",
-            "icon_type",
-            "icon",
-            "icon_background",
-            "description",
-            "default_language",
-            "chat_color_theme",
-            "chat_color_theme_inverted",
-            "customize_domain",
-            "copyright",
-            "privacy_policy",
-            "custom_disclaimer",
-            "customize_token_strategy",
-            "prompt_public",
-            "show_workflow_steps",
-            "use_icon_as_answer_icon",
-        ]:
-            value = args.get(attr_name)
-            if value is not None:
-                setattr(site, attr_name, value)
+            if not site:
+                raise NotFound
 
-        site.updated_by = current_user.id
-        site.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
-        db.session.commit()
+            for attr_name in [
+                "title",
+                "icon_type",
+                "icon",
+                "icon_background",
+                "description",
+                "default_language",
+                "chat_color_theme",
+                "chat_color_theme_inverted",
+                "customize_domain",
+                "copyright",
+                "privacy_policy",
+                "custom_disclaimer",
+                "customize_token_strategy",
+                "prompt_public",
+                "show_workflow_steps",
+                "use_icon_as_answer_icon",
+            ]:
+                value = args.get(attr_name)
+                if value is not None:
+                    setattr(site, attr_name, value)
+
+            site.updated_by = current_user.id
+            site.updated_at = datetime.now(UTC).replace(tzinfo=None)
+            session.commit()
 
         return site
 
@@ -100,7 +104,7 @@ class AppSiteAccessTokenReset(Resource):
 
         site.code = Site.generate_code(16)
         site.updated_by = current_user.id
-        site.updated_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        site.updated_at = datetime.now(UTC).replace(tzinfo=None)
         db.session.commit()
 
         return site
