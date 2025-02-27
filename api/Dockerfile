@@ -25,7 +25,7 @@ RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debia
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc g++ libc-dev libffi-dev libgmp-dev libmpfr-dev libmpc-dev
-
+RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --sync --no-cache --no-root
