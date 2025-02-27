@@ -28,7 +28,7 @@ RUN apt-get update \
 RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
-RUN poetry install --sync --no-cache --no-root
+RUN poetry install --sync --no-root
 
 # production stage
 FROM base AS production
