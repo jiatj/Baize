@@ -52,12 +52,9 @@ RUN echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.
     && apt-get update \
     && apt-get install -y --no-install-recommends curl nodejs libgmp-dev libmpfr-dev libmpc-dev \
     # if you located in China, you can use aliyun mirror to speed up
-    # && echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.list \
     # && echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list \
-    && apt-get update \
-    # && apt-get update \
     # For Security
-    && apt-get install -y --no-install-recommends zlib1g=1:1.3.dfsg+really1.3.1-1+b1 expat=2.6.4-1 libldap-2.5-0=2.5.18+dfsg-3+b1 perl=5.40.0-7 libsqlite3-0=3.46.1-1 \
+    && apt-get install -y --no-install-recommends zlib1g expat libldap-2.5-0 perl libsqlite3-0 \
         libmagic1 \
         # install libmagic to support the use of python-magic guess MIMETYPE
         media-types \
