@@ -16,7 +16,7 @@ ENV POETRY_CACHE_DIR=/tmp/poetry_cache
 ENV POETRY_NO_INTERACTION=1
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV POETRY_VIRTUALENVS_CREATE=true
-ENV POETRY_REQUESTS_TIMEOUT=15
+ENV POETRY_REQUESTS_TIMEOUT=60
 
 FROM base AS packages
 
@@ -28,7 +28,7 @@ RUN apt-get update \
 RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
-RUN poetry install --sync --no-root
+RUN poetry install --sync --no-cache --no-root
 
 # production stage
 FROM base AS production
