@@ -63,8 +63,10 @@ def decode_jwt_token():
         if not app_code:
             app_code = decoded.get('app_code')
         site = db.session.query(Site).filter(Site.code == app_code).first()
-        
-        app_model = db.session.query(App).filter(App.id ==site.app_id).first()
+        if not site:
+            app_model = db.session.query(App).first()
+        else:
+            app_model = db.session.query(App).filter(App.id ==site.app_id).first()
         #app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
       
         if not app_model:
