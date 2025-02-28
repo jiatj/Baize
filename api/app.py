@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv 
 
-from configs import dify_config 
 import sys
 
 
@@ -11,28 +10,9 @@ def is_db_command():
     return False
 
 
-
-
-import json
-import threading
-import time
-import warnings
-
 from flask import Response, current_app
-
 from app_factory import create_app
 
-# DO NOT REMOVE BELOW
-from events import event_handlers  # noqa: F401
-from extensions.ext_database import db
-
-# TODO: Find a way to avoid importing models here
-from models import account, dataset, model, source, task, tool, tools, web  # noqa: F401
-
-# DO NOT REMOVE ABOVE
-
-
-warnings.simplefilter("ignore", ResourceWarning)
 # Load environment variables
 load_dotenv()
 
@@ -84,43 +64,6 @@ else:
 
     app = create_app()
     celery = app.extensions["celery"]
-@app.route("/threads")
-def threads():
-    num_threads = threading.active_count()
-    threads = threading.enumerate()
-
-    thread_list = []
-    for thread in threads:
-        thread_name = thread.name
-        thread_id = thread.ident
-        is_alive = thread.is_alive()
-        thread_list.append(
-            {
-                "name": thread_name,
-                "id": thread_id,
-                "is_alive": is_alive,
-            }
-        )
-
-    return {
-        "pid": os.getpid(),
-        "thread_num": num_threads,
-        "threads": thread_list,
-    }
-
-
-@app.route("/db-pool-stat")
-def pool_stat():
-    engine = db.engine
-    return {
-        "pid": os.getpid(),
-        "pool_size": engine.pool.size(),
-        "checked_in_connections": engine.pool.checkedin(),
-        "checked_out_connections": engine.pool.checkedout(),
-        "overflow_connections": engine.pool.overflow(),
-        "connection_timeout": engine.pool.timeout(),
-        "recycle_time": db.engine.pool._recycle,
-    }
 
 
 def print_routes():
