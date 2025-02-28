@@ -89,7 +89,7 @@ def threads():
     num_threads = threading.active_count()
     threads = threading.enumerate()
 
-     thread_list = []
+    thread_list = []
     for thread in threads:
         thread_name = thread.name
         thread_id = thread.ident
