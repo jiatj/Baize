@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv 
+
+from configs import dify_config 
 import sys
 
 
@@ -9,9 +11,7 @@ def is_db_command():
     return False
 
 
-    import grpc.experimental.gevent
 
-    grpc.experimental.gevent.init_gevent()
 
 import json
 import threading
@@ -84,7 +84,16 @@ else:
 
     app = create_app()
     celery = app.extensions["celery"]
+@app.route("/threads")
+def threads():
+    num_threads = threading.active_count()
+    threads = threading.enumerate()
 
+     thread_list = []
+    for thread in threads:
+        thread_name = thread.name
+        thread_id = thread.ident
+        is_alive = thread.is_alive()
         thread_list.append(
             {
                 "name": thread_name,
