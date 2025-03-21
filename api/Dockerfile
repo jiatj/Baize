@@ -50,11 +50,15 @@ WORKDIR /app/api
 
 RUN \
     apt-get update \
-    && apt-get install -y --no-install-recommends curl nodejs libgmp-dev libmpfr-dev libmpc-dev \
-    # if you located in China, you can use aliyun mirror to speed up
-    # && echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list \
-    # For Security
-        zlib1g expat libldap-2.5-0 perl libsqlite3-0 \
+    # Install dependencies
+    && apt-get install -y --no-install-recommends \
+        # basic environment
+        curl nodejs libgmp-dev libmpfr-dev libmpc-dev \
+        # For Security
+        expat libldap-2.5-0 perl libsqlite3-0 zlib1g \
+        # install a package to improve the accuracy of guessing mime type and file extension
+        media-types \
+        # install libmagic to support the use of python-magic guess MIMETYPE
         libmagic1 \
         # install libmagic to support the use of python-magic guess MIMETYPE
         media-types \
