@@ -30,7 +30,7 @@ RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
 #RUN poetry install --sync --no-cache --no-root
-RUN poetry install --sync --no-cache --no-root --without-dev --max-timeout 600
+RUN poetry install --sync --no-cache --no-root --max-timeout 600
 # production stage
 FROM base AS production
 
