@@ -239,7 +239,7 @@ const Main: FC = () => {
   const [commandList, setCommandList] = useState([] as CommandItem[])
   const getCommondListByConversationId = async (conversation_id: string) => {
     const comList: { result: CommandItem[]; code: number } = await extApi('command', 'order', { conversation_id }) as { result: CommandItem[]; code: number }
-    setCommandList(comList?.result as CommandItem[])
+    Array.isArray(comList.result) ? setCommandList(comList?.result as CommandItem[]) : setCommandList([])
   }
   // init
   useEffect(() => {
