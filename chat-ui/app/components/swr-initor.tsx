@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { iframeLogin, login, switchApp } from '@/service'
-import { isDev } from '@/config'
+import { isDev, isProd } from '@/config'
 
 type SwrInitorProps = {
   children: ReactNode
@@ -76,9 +76,10 @@ const SwrInitor = ({
       // return
       // let url = API_URL + `/sys/thirdLogin/render/${source}`
       console.log(isDev)
-      const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : 'http://yuntengwangluo.3322.org:8081/bot'
+      const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : isProd ? 'http://yuntengwangluo.3322.org:8081/bot' : 'http://yuntengwangluo.3322.org:8090/bot'
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
-      const url = `http://yuntengwangluo.3322.org:8082/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
+      const netUrl = isProd ? 'https://itgo.live' : 'http://yuntengwangluo.3322.org:8082'
+      const url = `${netUrl}/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
       const u = navigator.userAgent
       const isAndroid = u.includes('Android') || u.includes('Adr') // android终端
       const isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)
