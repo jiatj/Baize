@@ -27,7 +27,7 @@ RUN mkdir -p /root/.pip && \
     echo "[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple\ntrusted-host = pypi.tuna.tsinghua.edu.cn" > /root/.pip/pip.conf
 
 
-
+RUN apt-get clean
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ libc-dev libffi-dev libgmp-dev libmpfr-dev libmpc-dev
 #RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/
