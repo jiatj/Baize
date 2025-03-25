@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { iframeLogin, login, switchApp } from '@/service'
-import { isDev } from '@/config'
+import { isDev, isProd } from '@/config'
 
 type SwrInitorProps = {
   children: ReactNode
