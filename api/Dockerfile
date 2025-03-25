@@ -23,13 +23,23 @@ FROM base AS packages
 # if you located in China, you can use aliyun mirror to speed up
 RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources
 
+RUN mkdir -p /root/.pip && \
+    echo "[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple\ntrusted-host = pypi.tuna.tsinghua.edu.cn" > /root/.pip/pip.conf
+
+
+
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ libc-dev libffi-dev libgmp-dev libmpfr-dev libmpc-dev
 #RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/
+ENV POETRY_HTTP_BASIC_PYPI_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 ENV PIP_TIMEOUT=600
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
-RUN pip install --upgrade setuptools
+# 更新 poetry.lock 文件
+RUN poetry lock
+
+RUN poetry config repositories
+RUN pip install --upgrade setuptools 
 RUN poetry sync --no-cache --no-root
 #RUN poetry install --sync --no-root
 # production stage
@@ -75,8 +85,20 @@ ENV VIRTUAL_ENV=/app/api/.venv
 COPY --from=packages ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 
+
 # Download nltk data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('averaged_perceptron_tagger')"
+#RUN python -c "import nltk; nltk.download('punkt',url='https://mirrors.tuna.tsinghua.edu.cn/nltk/'); nltk.download('averaged_perceptron_tagger',url='https://mirrors.tuna.tsinghua.edu.cn/nltk/')"
+
+# 设置NLTK数据和镜像源
+ENV NLTK_DATA=/usr/local/share/nltk_data
+ENV NLTK_DATA_URL=https://mirrors.tuna.tsinghua.edu.cn/nltk_data/
+
+# 安装依赖并下载数据
+RUN pip install nltk && \
+    mkdir -p $NLTK_DATA && \
+    python -c "import nltk; nltk.download('punkt', download_dir='$NLTK_DATA')" && \
+    python -c "import nltk; nltk.download('averaged_perceptron_tagger', download_dir='$NLTK_DATA')"
+
 
 ENV TIKTOKEN_CACHE_DIR=/app/api/.tiktoken_cache
 
