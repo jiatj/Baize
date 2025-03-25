@@ -16,7 +16,7 @@ ENV POETRY_CACHE_DIR=/tmp/poetry_cache
 ENV POETRY_NO_INTERACTION=1
 ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 ENV POETRY_VIRTUALENVS_CREATE=true
-ENV POETRY_REQUESTS_TIMEOUT=60
+ENV POETRY_REQUESTS_TIMEOUT=300
 
 FROM base AS packages
 
@@ -26,6 +26,7 @@ RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debia
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ libc-dev libffi-dev libgmp-dev libmpfr-dev libmpc-dev
 #RUN poetry config repositories.tuna https://pypi.tuna.tsinghua.edu.cn/simple
 RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/
+RUN poetry source add --priority=default aliyun https://mirrors.aliyun.com/pypi/simple/
 ENV PIP_TIMEOUT=600
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
