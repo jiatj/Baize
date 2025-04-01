@@ -65,9 +65,9 @@ class OAuth2Client():
     # 得到用户信息    
 
 class OAuth2Config:
-    TOKEN_URL = 'http://192.168.10.68:8080/sso/oauth2/token'
-    EXCHANGE_URL = 'http://192.168.10.68:8080/sso/exchange/token'
-    USER_URL= 'http://192.168.10.68:8080/sso/user/info'
+    TOKEN_URL =    'https://site.itgo.live/sso/oauth2/token'
+    EXCHANGE_URL = 'https://site.itgo.live/sso/exchange/token'
+    USER_URL =     'https://site.itgo.live/sso/user/info'
     APP_ID = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
     APP_SECRET= 'abcde333333dafasdf@@@'
 
