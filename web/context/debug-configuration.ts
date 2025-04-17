@@ -1,3 +1,4 @@
+import type { RefObject } from 'react'
 import { createContext, useContext } from 'use-context-selector'
 import { PromptMode } from '@/models/debug'
 import type {
@@ -92,11 +93,14 @@ type IDebugConfiguration = {
   showSelectDataSet: () => void
   // dataset config
   datasetConfigs: DatasetConfigs
+  datasetConfigsRef: RefObject<DatasetConfigs>
   setDatasetConfigs: (config: DatasetConfigs) => void
   hasSetContextVar: boolean
   isShowVisionConfig: boolean
   visionConfig: VisionSettings
   setVisionConfig: (visionConfig: VisionSettings, noNotice?: boolean) => void
+  isAllowVideoUpload: boolean
+  isShowDocumentConfig: boolean
   rerankSettingModalOpen: boolean
   setRerankSettingModalOpen: (rerankSettingModalOpen: boolean) => void
 }
@@ -234,6 +238,9 @@ const DebugConfigurationContext = createContext<IDebugConfiguration>({
       datasets: [],
     },
   },
+  datasetConfigsRef: {
+    current: null,
+  },
   setDatasetConfigs: () => { },
   hasSetContextVar: false,
   isShowVisionConfig: false,
@@ -244,6 +251,8 @@ const DebugConfigurationContext = createContext<IDebugConfiguration>({
     transfer_methods: [TransferMethod.remote_url],
   },
   setVisionConfig: () => { },
+  isAllowVideoUpload: false,
+  isShowDocumentConfig: false,
   rerankSettingModalOpen: false,
   setRerankSettingModalOpen: () => { },
 })

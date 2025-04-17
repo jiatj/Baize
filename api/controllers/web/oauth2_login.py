@@ -52,7 +52,7 @@ class Auth2LoginResource(Resource):
             raise Unauthorized('Failed to get user info from SSO.')   
          # 得到apps
         infos = userInfo.get("infos")
-        apps = infos.get("apps")   
+        apps = infos.get("  ")   
         nick_name = userInfo.get("nickname")
         default_app = self.get_default_app(apps)
         print(f'defalt app 肯定有啊={default_app}')

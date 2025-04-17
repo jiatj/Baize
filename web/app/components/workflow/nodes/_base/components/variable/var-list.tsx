@@ -18,6 +18,7 @@ type Props = {
   isSupportConstantValue?: boolean
   onlyLeafNodeVar?: boolean
   filterVar?: (payload: Var, valueSelector: ValueSelector) => boolean
+  isSupportFileVar?: boolean
 }
 
 const VarList: FC<Props> = ({
@@ -29,6 +30,7 @@ const VarList: FC<Props> = ({
   isSupportConstantValue,
   onlyLeafNodeVar,
   filterVar,
+  isSupportFileVar = true,
 }) => {
   const { t } = useTranslation()
 
@@ -94,10 +96,11 @@ const VarList: FC<Props> = ({
             defaultVarKindType={item.variable_type}
             onlyLeafNodeVar={onlyLeafNodeVar}
             filterVar={filterVar}
+            isSupportFileVar={isSupportFileVar}
           />
           {!readonly && (
             <RemoveButton
-              className='!p-2 !bg-gray-100 hover:!bg-gray-200'
+              className='!bg-gray-100 !p-2 hover:!bg-gray-200'
               onClick={handleVarRemove(index)}
             />
           )}

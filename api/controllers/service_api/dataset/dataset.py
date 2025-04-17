@@ -1,5 +1,5 @@
 from flask import request
-from flask_restful import marshal, reqparse
+from flask_restful import marshal, reqparse  # type: ignore
 from werkzeug.exceptions import NotFound
 
 import services.dataset_service
@@ -7,6 +7,7 @@ from controllers.service_api import api
 from controllers.service_api.dataset.error import DatasetInUseError, DatasetNameDuplicateError
 from controllers.service_api.wraps import DatasetApiResource
 from core.model_runtime.entities.model_entities import ModelType
+from core.plugin.entities.plugin import ModelProviderID
 from core.provider_manager import ProviderManager
 from fields.dataset_fields import dataset_detail_fields
 from libs.login import current_user
@@ -31,8 +32,11 @@ class DatasetListApi(DatasetApiResource):
         # provider = request.args.get("provider", default="vendor")
         search = request.args.get("keyword", default=None, type=str)
         tag_ids = request.args.getlist("tag_ids")
+        include_all = request.args.get("include_all", default="false").lower() == "true"
 
-        datasets, total = DatasetService.get_datasets(page, limit, tenant_id, current_user, search, tag_ids)
+        datasets, total = DatasetService.get_datasets(
+            page, limit, tenant_id, current_user, search, tag_ids, include_all
+        )
         # check embedding setting
         provider_manager = ProviderManager()
         configurations = provider_manager.get_configurations(tenant_id=current_user.current_tenant_id)
@@ -45,7 +49,8 @@ class DatasetListApi(DatasetApiResource):
 
         data = marshal(datasets, dataset_detail_fields)
         for item in data:
-            if item["indexing_technique"] == "high_quality":
+            if item["indexing_technique"] == "high_quality" and item["embedding_model_provider"]:
+                item["embedding_model_provider"] = str(ModelProviderID(item["embedding_model_provider"]))
                 item_model = f"{item['embedding_model']}:{item['embedding_model_provider']}"
                 if item_model in model_names:
                     item["embedding_available"] = True
@@ -65,6 +70,13 @@ class DatasetListApi(DatasetApiResource):
             required=True,
             help="type is required. Name must be between 1 to 40 characters.",
             type=_validate_name,
+        )
+        parser.add_argument(
+            "description",
+            type=str,
+            nullable=True,
+            required=False,
+            default="",
         )
         parser.add_argument(
             "indexing_technique",
@@ -108,6 +120,7 @@ class DatasetListApi(DatasetApiResource):
             dataset = DatasetService.create_empty_dataset(
                 tenant_id=tenant_id,
                 name=args["name"],
+                description=args["description"],
                 indexing_technique=args["indexing_technique"],
                 account=current_user,
                 permission=args["permission"],

@@ -1,7 +1,7 @@
 from functools import wraps
 
 from flask import request
-from flask_restful import Resource
+from flask_restful import Resource  # type: ignore
 from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
 from controllers.web.error import WebSSOAuthRequiredError
@@ -63,8 +63,10 @@ def decode_jwt_token():
         if not app_code:
             app_code = decoded.get('app_code')
         site = db.session.query(Site).filter(Site.code == app_code).first()
-        
-        app_model = db.session.query(App).filter(App.id ==site.app_id).first()
+        if not site:
+            app_model = db.session.query(App).first()
+        else:
+            app_model = db.session.query(App).filter(App.id ==site.app_id).first()
         #app_model = db.session.query(App).filter(App.id == decoded["app_id"]).first()
       
         if not app_model:
