@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import {
   ChatBubbleOvalLeftEllipsisIcon,
   PencilSquareIcon,
-  ServerIcon
+  ServerIcon,
 } from '@heroicons/react/24/outline'
 import { ChatBubbleOvalLeftEllipsisIcon as ChatBubbleOvalLeftEllipsisSolidIcon, ServerIcon as ServerSolidIcon } from '@heroicons/react/24/solid'
+import AppIcon from '../base/app-icon'
 import Button from '@/app/components/base/button'
 // import Card from './card'
 import type { ConversationItem } from '@/types/app'
@@ -22,9 +23,9 @@ export type ISidebarProps = {
   currentId: string
   onCurrentIdChange: (id: string) => void
   onLoadMore: () => void
-  list: ConversationItem[],
+  list: ConversationItem[]
   appList: any[]
-  APP_ID: string,
+  APP_ID: string
   onAppIdChange: (id: string) => void
   hasMore: boolean
   isMoreLoading?: boolean
@@ -40,7 +41,7 @@ const Sidebar: FC<ISidebarProps> = ({
   APP_ID,
   onAppIdChange,
   hasMore,
-  isMoreLoading
+  isMoreLoading,
 }) => {
   const { t } = useTranslation()
   return (
@@ -63,12 +64,18 @@ const Sidebar: FC<ISidebarProps> = ({
                 'group flex items-center rounded-md px-2 py-2 text-sm font-medium cursor-pointer',
               )}
             >
-              <div className={classNames(
+              {/* <div className={classNames(
                 isCurrent
                   ? 'text-primary-600'
                   : 'text-gray-400 group-hover:text-gray-500',
                 'mr-3 h-5 w-5 flex-shrink-0',
-              )}>{item.icon}</div>
+              )}>{item.icon}</div> */}
+              <AppIcon
+                size='small'
+                className='cursor-pointer w-5 h-5 mr-3 flex-shrink-0'
+                iconType={'emoji'}
+                icon={item.icon}
+              />
               {item.name}
             </div>
           )

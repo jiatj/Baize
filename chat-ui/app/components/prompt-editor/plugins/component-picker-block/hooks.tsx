@@ -45,6 +45,7 @@ export const useMenuOptions = (
               queryString={queryString}
               isSelected={isSelected}
               onClick={onSelect}
+              onMouseDown={onSelect}
               onMouseEnter={onSetHighlight}
             />
           )

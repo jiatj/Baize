@@ -44,7 +44,7 @@ const BottomBlock: FC<BottomBlockProps> = ({
   useEffect(() => {
     editor.update(() => {
       const selection = $getSelection()
-      if (selection)
+      if (selection && Object.keys(currentTag).length > 0)
         selection.insertText(`${currentTag.type}=${currentTag.name} `)
     })
   }, [currentTag])

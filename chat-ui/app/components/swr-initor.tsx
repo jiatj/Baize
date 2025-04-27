@@ -76,8 +76,10 @@ const SwrInitor = ({
       // return
       // let url = API_URL + `/sys/thirdLogin/render/${source}`
       console.log(isDev)
+      // 回跳
       const redirect_url = isDev ? 'http://192.168.10.199:3000/bot' : isProd ? 'http://yuntengwangluo.3322.org:8081/bot' : 'http://yuntengwangluo.3322.org:8090/bot'
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
+      // 跳转
       const netUrl = isProd ? 'https://itgo.live' : 'http://yuntengwangluo.3322.org:8082'
       const url = `${netUrl}/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
       

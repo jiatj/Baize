@@ -8,6 +8,7 @@ import type { FeedbackFunc } from '../type'
 import s from '../style.module.css'
 import ImageGallery from '../../base/image-gallery'
 import Thought from '../thought'
+import SuggestedQuestions from './suggested-questions'
 import { randomString } from '@/utils/string'
 import type { ChatItem, MessageRating, TextToSpeechSettings, VisionFile } from '@/types/app'
 import Tooltip from '@/app/components/base/tooltip'
@@ -223,8 +224,15 @@ const Answer: FC<IAnswerProps> = ({
                 )
                 : (isAgentMode
                   ? agentModeAnswer
-                  : (
-                    <Markdown content={content} onSend={onSend} />
+                  : (item.isOpeningStatement && item.suggestedQuestions?.length > 0
+                    ? (
+                      <div className='body-lg-regular grow rounded-2xl bg-chat-bubble-bg px-4 py-3 text-text-primary'>
+                        <Markdown content={content} onSend={onSend} />
+                        <SuggestedQuestions item={item} onSend={onSend} />
+                      </div>
+                    )
+                    : (<Markdown content={content} onSend={onSend} />)
+
                   ))}
             </div>
             <div className='absolute top-[-14px] right-[-14px] flex flex-row justify-end gap-1'>

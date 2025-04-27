@@ -25,10 +25,12 @@ import type { PickerBlockMenuOption } from './menu'
 type ComponentPickerProps = {
   triggerString: string
   menuBlock?: MenuBlockType
+  updateMenuBlock?: (menuBlock: MenuBlockType) => void
 }
 const ComponentPicker = ({
   triggerString,
   menuBlock,
+  updateMenuBlock,
 }: ComponentPickerProps) => {
   const { refs, floatingStyles, isPositioned } = useFloating({
     placement: 'bottom-start',
@@ -51,9 +53,20 @@ const ComponentPicker = ({
       if (slashMatch !== null)
         return null
 
-      return getPossibleQueryMatch(text)
+      const mentionMatch = getPossibleQueryMatch(text)
+      if (mentionMatch !== null) {
+        // matchingString === '' 表示刚输入了 '@'，还没输别的字符
+        if (mentionMatch.matchingString === '' && updateMenuBlock)
+          updateMenuBlock(menuBlock!)
+      }
+      return mentionMatch
     },
-    [checkForSlashTriggerMatch, editor],
+    [
+      checkForSlashTriggerMatch,
+      editor,
+      updateMenuBlock,
+      menuBlock,
+    ],
   )
 
   function getPossibleQueryMatch(text: string): MenuTextMatch | null {
@@ -188,7 +201,7 @@ const ComponentPicker = ({
               >
                 {
                   options.map((option, index) => (
-                    <Fragment key={option.key}>
+                    <Fragment key={index}>
                       {option.renderMenuOption({
                         queryString,
                         isSelected: selectedIndex === index,

@@ -51,6 +51,8 @@ const Main: FC = () => {
     transfer_methods: [TransferMethod.local_file],
   })
 
+  const [suggestedAnswer, setSuggestedAnswer] = useState<any>({})
+
   const [speechToTextConfig, setSpeechToTextConfig] = useState<SpeechToTextSettings | undefined>({
     enabled: true,
     language: 'zh-Hans',
@@ -166,12 +168,12 @@ const Main: FC = () => {
             message_files: item.message_files?.filter((file: any) => file.belongs_to === 'assistant') || [],
           })
         })
-        setChatList(newChatList)
+        setChatList(Object.keys(suggestedAnswer).length > 0 ? [suggestedAnswer, ...newChatList] : newChatList)
       })
     }
 
     if (isNewConversation && isChatStarted)
-      setChatList(generateNewChatListWithOpenstatement())
+      setChatList(Object.keys(suggestedAnswer).length > 0 ? [suggestedAnswer, ...generateNewChatListWithOpenstatement()] : generateNewChatListWithOpenstatement())
   }
   useEffect(handleConversationSwitch, [currConversationId, inited])
 
@@ -182,6 +184,7 @@ const Main: FC = () => {
     }
     else {
       setConversationIdChangeBecauseOfNew(false)
+      // setChatList(Object.keys(suggestedAnswer).length > 0 ? [suggestedAnswer, ...getChatList()] : getChatList())
     }
     // trigger handleConversationSwitch
     getCommondListByConversationId(id)
@@ -263,8 +266,22 @@ const Main: FC = () => {
         const isNotNewConversation = conversations.some(item => item.id === _conversationId)
 
         // fetch new conversation info
-        const { user_input_form, opening_statement: introduction, file_upload, system_parameters, text_to_speech, speech_to_text }: any = appParams
+        const { user_input_form, opening_statement: introduction, file_upload, system_parameters, text_to_speech, speech_to_text, suggested_questions, opening_statement }: any = appParams
         setLocaleOnClient(APP_INFO.default_language, true)
+        if (opening_statement && suggested_questions?.length > 0) {
+          const configSuggestedAnswer = {
+            id: 'opening-statement',
+            content: opening_statement,
+            isAnswer: true,
+            isOpeningStatement: true,
+            suggestedQuestions: suggested_questions,
+            feedbackDisabled: true,
+          }
+          console.log('configSuggestedAnswer', configSuggestedAnswer)
+          setChatList([configSuggestedAnswer, ...getChatList()])
+          setSuggestedAnswer(configSuggestedAnswer)
+        }
+
         setNewConversationInfo({
           name: t('app.chat.newChatDefaultName'),
           introduction,
@@ -659,13 +676,16 @@ const Main: FC = () => {
   }
 
   const handleAppIdChange = async (appId: string) => {
-    setChatNotStarted()
+    // setChatNotStarted()
     setAppUnavailable(false)
     const { app_code }: any = await switchApp(appId)
     setAPP_ID(appId)
     setApp_code(app_code)
+    setSuggestedAnswer({})
+    handleStartChat()
     globalThis.localStorage.setItem('app_code', app_code)
     globalThis.localStorage.setItem('APP_ID', appId)
+    // handleStartChat()
   }
   const renderSidebar = () => {
     if (!APP_ID || !APP_INFO)
@@ -693,6 +713,9 @@ const Main: FC = () => {
   //   return <AppUnavailable isUnknwonReason={isUnknwonReason} errMessage={!hasSetAppConfig ? 'Please set APP_ID and API_KEY in config/index.tsx' : ''} />
   if (!APP_ID || !APP_INFO)
     return <Loading type='app' />
+  useEffect(() => {
+    handleStartChat()
+  }, [])
   return (
     <div className='bg-gray-100'>
       <Header
@@ -744,7 +767,11 @@ const Main: FC = () => {
                 <div className='h-full overflow-y-auto' ref={chatListDomRef}>
                   <Chat
                     currConversationId={currConversationId}
-                    chatList={chatList}
+                    chatList={chatList.map((item, idx) => {
+                      if (idx === 1 && item.content === suggestedAnswer.content)
+                        return null
+                      return item
+                    }).filter(item => item)}
                     commandList={commandList}
                     onSend={handleSend}
                     onFeedback={handleFeedback}
@@ -757,6 +784,7 @@ const Main: FC = () => {
                     textToSpeechConfig={textToSpeechConfig}
                     setHasImage={handleSetHasImage}
                     setHasVideo={handleSetHasVideo}
+                    handleUpdateMenuBlock={() => getCommondListByConversationId(currConversationId)}
                   />
                 </div>
               </div>)

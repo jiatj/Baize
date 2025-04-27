@@ -4,6 +4,8 @@ import type { Emoji } from './tools'
 import type { Locale } from '@/i18n'
 import type { ThoughtItem } from '@/app/components/chat/type'
 
+export type AppIconType = 'image' | 'emoji'
+
 export type PromptVariable = {
   key: string
   name: string

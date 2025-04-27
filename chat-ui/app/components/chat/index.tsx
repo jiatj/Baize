@@ -64,6 +64,7 @@ export type IChatProps = {
   setHasImage?: (hasImage: boolean) => void
   setHasVideo?: (hasVideo: boolean) => void
   onStopResponding?: () => void
+  handleUpdateMenuBlock?: () => void
 }
 
 const Chat: FC<IChatProps> = ({
@@ -85,6 +86,7 @@ const Chat: FC<IChatProps> = ({
   setHasImage,
   setHasVideo,
   onStopResponding,
+  handleUpdateMenuBlock,
 }) => {
   const { t } = useTranslation()
   const { notify } = Toast
@@ -398,6 +400,7 @@ const Chat: FC<IChatProps> = ({
                   })),
                   onSelect: (selectItem) => { handleTagSelect(selectItem) },
                 }}
+                updateMenuBlock={handleUpdateMenuBlock}
                 onChange={handleContentChange}
                 onBlur={() => {
                   handleContentChange

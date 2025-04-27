@@ -48,6 +48,7 @@ export type PromptEditorProps = {
   currentTag: any
   setCurrentTag?: (currentTag: any) => void
   currConversationId?: string
+  updateMenuBlock?: (menuBlock: MenuBlockType) => void
 }
 
 const PromptEditor: FC<PromptEditorProps> = ({
@@ -71,6 +72,7 @@ const PromptEditor: FC<PromptEditorProps> = ({
   currentTag,
   setCurrentTag,
   currConversationId,
+  updateMenuBlock,
 }) => {
   const initialConfig = {
     namespace: 'prompt-editor',
@@ -119,6 +121,7 @@ const PromptEditor: FC<PromptEditorProps> = ({
         <ComponentPickerBlock
           triggerString='@'
           menuBlock={menuBlock}
+          updateMenuBlock={updateMenuBlock}
         />
         <OnChangePlugin onChange={handleEditorChange} />
         <OnBlurBlock onBlur={onBlur} onFocus={onFocus} />
