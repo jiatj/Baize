@@ -677,6 +677,7 @@ const Main: FC = () => {
 
   const handleAppIdChange = async (appId: string) => {
     // setChatNotStarted()
+    setChatList([])
     setAppUnavailable(false)
     const { app_code }: any = await switchApp(appId)
     setAPP_ID(appId)
