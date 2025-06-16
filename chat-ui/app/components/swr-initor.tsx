@@ -80,7 +80,6 @@ const SwrInitor = ({
       const appid = '8cf949fc-9ea4-4b70-80f1-57a1f5f89bf3'
       const netUrl = isProd ? 'https://itgo.live' : 'http://yuntengwangluo.3322.org:8082'
       const url = `${netUrl}/login?redirect_url=${encodeURIComponent(redirect_url)}&appid=${encodeURIComponent(appid)}`
-      
       const u = navigator.userAgent
       const isAndroid = u.includes('Android') || u.includes('Adr') // android终端
       const isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)
