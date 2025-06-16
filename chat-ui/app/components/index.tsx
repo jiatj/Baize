@@ -679,6 +679,7 @@ const Main: FC = () => {
     // setChatNotStarted()
     setChatList([])
     setAppUnavailable(false)
+    setCommandList([])
     const { app_code }: any = await switchApp(appId)
     setAPP_ID(appId)
     setApp_code(app_code)
@@ -767,6 +768,7 @@ const Main: FC = () => {
               >
                 <div className='h-full overflow-y-auto' ref={chatListDomRef}>
                   <Chat
+                    appid={APP_ID}
                     currConversationId={currConversationId}
                     chatList={chatList.map((item, idx) => {
                       if (idx === 1 && item.content === suggestedAnswer.content)

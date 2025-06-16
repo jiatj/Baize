@@ -40,6 +40,7 @@ function onError(error: Error) {
 }
 
 export type IChatProps = {
+  appid?: string
   currConversationId?: string
   chatList: ChatItem[]
   commandList: CommandItem[]
@@ -68,6 +69,7 @@ export type IChatProps = {
 }
 
 const Chat: FC<IChatProps> = ({
+  appid,
   currConversationId,
   chatList,
   commandList,
@@ -137,6 +139,13 @@ const Chat: FC<IChatProps> = ({
     setCurrentTag(tag)
     setQuery('')
   }
+
+  console.log('appid', appid)
+
+  useEffect(() => {
+    setCurrentTag({})
+    setQuery('')
+  }, [appid, currConversationId])
   const handleSend = () => {
     if (!valid() || (checkCanSend && !checkCanSend()))
       return
@@ -306,7 +315,7 @@ const Chat: FC<IChatProps> = ({
                 ? (Object.keys(currentTag).length > 0 ? '-100px' : '-80px')
                 : (Object.keys(currentTag).length > 0 ? '-40px' : '-20px'),
           }}
-            className={'absolute left-2 z-10 max-h-[136px] overflow-y-auto pt-2'}>
+          className={'absolute left-2 z-10 max-h-[136px] overflow-y-auto pt-2'}>
             <ImageList
               list={files}
               onRemove={(fileId) => { onRemove(fileId, setHasImage) }}
