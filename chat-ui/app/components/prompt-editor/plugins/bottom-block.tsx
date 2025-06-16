@@ -46,7 +46,7 @@ const BottomBlock: FC<BottomBlockProps> = ({
       const selection = $getSelection()
       if (selection && Object.keys(currentTag).length > 0)
         selection.insertText(`${currentTag.type}=${currentTag.name} `)
-      else if(selection && Object.keys(currentTag).length === 0)
+      else if (selection && Object.keys(currentTag).length === 0)
         selection.insertText('')
     })
   }, [currentTag])
