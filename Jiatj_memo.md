@@ -28,6 +28,11 @@
     2.3 接收回调得到code
     2.4 调用api/auth2/login/{code}，在Baize中，我增加的api，调用单点服务器，通过code得到access_token
         2.4.1 OAuth2Client  配置sso地址
+    ~~~  
+    TOKEN_URL =    'https://site.itgo.live/sso/oauth2/token'
+    EXCHANGE_URL = 'https://site.itgo.live/sso/exchange/token'
+    USER_URL =     'https://site.itgo.live/sso/user/info'
+    ~~~
 
     2.5 Baize 调用sso得到token
     2.6 如果本地没有用户，调用sso 的user/info得到用户信息，插入end_user中，其中externa_user_id是sso中用户的id
@@ -127,3 +132,11 @@ api/controllers/web下增加
     raise FileNotFoundError("File not found")
  读D:\pyspace\dify-main\api\storage/privkeys/23d23628-016a-4842-abd1-3d630c985fd1/private.pem   
 ~~~
+
+
+## 分支版本
+地址: 
+1. main 分支
+2. yz 分支
+
+## 
