@@ -56,7 +56,7 @@ const SwrInitor = ({
   }
 
   useEffect(() => {
-    if (token && !accessTokenFromLocalStorage) {
+    if (token) {
       handleLoginByIframe(token)
       return
     }
