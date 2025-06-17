@@ -14,7 +14,7 @@ export const isShowPrompt = false
 export const promptTemplate = 'I want you to act as a javascript console.'
 export const isDev = false
 // 生产还是测试，改这里
-export const isProd = false
+export const isProd = true
 export const API_PREFIX = isDev ? 'http://yuntengwangluo.3322.org:8090/api' : '/api'
 
 export const LOCALE_COOKIE_NAME = 'locale'
