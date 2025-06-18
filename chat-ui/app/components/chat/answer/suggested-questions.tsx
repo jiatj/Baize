@@ -23,7 +23,7 @@ const SuggestedQuestions: FC<SuggestedQuestionsProps> = ({
       {suggestedQuestions.filter(q => !!q && q.trim()).map((question, index) => (
         <Button
           key={index}
-          className='mr-1 mt-1 max-w-full shrink-0 last:mr-0 bg-white hover:bg-gray-100 text-blue-600 text-sm'
+          className='mr-1 mt-1 max-w-full shrink-0 last:mr-0 bg-white hover:bg-gray-100 text-blue-600 text-sm !h-auto'
           onClick={() => onSend?.(question)}
         >
           {question}
